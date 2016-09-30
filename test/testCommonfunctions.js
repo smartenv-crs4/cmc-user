@@ -48,7 +48,7 @@ exports.setAuthMsMicroservice=function(doneCallback){
         function(callback){ // create admins and users type tokens
             var users=conf.testConfig.adminokens.concat(conf.testConfig.usertokens);
             var usersId=[];
-            async.each(users,function(tokenT,clb){
+            async.eachSeries(users,function(tokenT,clb){
                 var rqparams={
                     url:url+"/usertypes",
                     headers: {'content-type': 'application/json', 'Authorization': "Bearer " + conf.MyMicroserviceToken},
@@ -75,7 +75,7 @@ exports.setAuthMsMicroservice=function(doneCallback){
         function(callback){// create Authorized(webUI) app Type type tokens
             var apps=conf.testConfig.authApptokens;
             var appsId=[];
-            async.each(apps,function(tokenT,clb){
+            async.eachSeries(apps,function(tokenT,clb){
                 var rqparams={
                     url:url+"/apptypes",
                     headers: {'content-type': 'application/json', 'Authorization': "Bearer " + conf.MyMicroserviceToken},
