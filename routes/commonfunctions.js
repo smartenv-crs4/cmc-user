@@ -32,7 +32,7 @@ exports.createUserAsAdmin = function(user,callb) {
             var loginToken = JSON.parse(body);
 
             if(!loginToken.error){ // ho un token valido
-                user.id=loginToken.userId;
+                user._id=loginToken.userId;
                 delete user['password'];
                 delete user['type'];
                 delete loginToken['userId'];
@@ -40,7 +40,7 @@ exports.createUserAsAdmin = function(user,callb) {
                 User.create(user,function(err,newUser){
                     if(err){
                         rqparams={
-                            url:conf.microserviceAuthMS+'/authuser/' + user.id,
+                            url:conf.microserviceAuthMS+'/authuser/' + user._id,
                             headers : {'Authorization' : "Bearer "+ conf.MyMicroserviceToken}
                         };
 
@@ -56,7 +56,7 @@ exports.createUserAsAdmin = function(user,callb) {
                         var tmpU=JSON.parse(JSON.stringify(newUser));
                         console.log("new user:"+ util.inspect(tmpU));
                         delete tmpU['__v'];
-                        delete tmpU['_id'];
+                        //delete tmpU['_id'];
                         return callb(null,201,{"created_resource":tmpU, "access_credentials":loginToken});
                     }
                 });

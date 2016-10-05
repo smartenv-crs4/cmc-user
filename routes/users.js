@@ -254,7 +254,7 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
             var loginToken = JSON.parse(body);
 
             if(!loginToken.error){ // ho un token valido
-                user.id=loginToken.userId;
+                user._id=loginToken.userId;
                 delete user['password'];
                 delete user['type'];
                 delete loginToken['userId'];
@@ -262,7 +262,7 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
                     User.create(user, function (err, newUser) {
                         if (err) {
                             rqparams = {
-                                url: microserviceBaseURL + '/authuser/' + user.id,
+                                url: microserviceBaseURL + '/authuser/' + user._id,
                                 headers: {'Authorization': "Bearer " + microserviceTokem}
                             };
 
@@ -278,14 +278,14 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
                             var tmpU = JSON.parse(JSON.stringify(newUser));
                             console.log("new user:" + util.inspect(tmpU));
                             delete tmpU['__v'];
-                            delete tmpU['_id'];
+                            //delete tmpU['_id'];
                             return res.status(201).send({"created_resource": tmpU, "access_credentials": loginToken});
                         }
                     });
                 } catch (ex){
                 //console.log("ECCCEPTIO "+ ex);
                     rqparams = {
-                        url: microserviceBaseURL + '/authuser/' + user.id,
+                        url: microserviceBaseURL + '/authuser/' + user._id,
                         headers: {'Authorization': "Bearer " + microserviceTokem}
                     };
                     request.delete(rqparams, function (error, response, body) {
@@ -455,7 +455,7 @@ router.get('/',[jwtMiddle.decodeToken],function(req, res) {
 
     var fields = req.dbQueryFields;
     if (!fields)
-        fields = '-hash -salt -__v -_id';
+        fields = '-hash -salt -__v';
 
 
     var query = {};
@@ -609,11 +609,11 @@ router.get('/:id',[jwtMiddle.decodeToken,middlewares.ensureUserIsAdminOrSelf], f
 
     var fields = req.dbQueryFields;
     if (!fields)
-        fields = '-hash -salt -__v -_id';
+        fields = '-hash -salt -__v';
 
     var id = (req.params.id).toString();
 
-    User.findOne({id:id}, fields, function(err, results){
+    User.findById(id, fields, function(err, results){
         if(!err){
                 res.send(results);
         }
@@ -697,14 +697,14 @@ router.put('/:id',[jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf], 
         return res.status(401).send({error:"Forbidden",error_message: 'only admins users can update email'});
     }
 
-    User.findOneAndUpdate({id:id}, newVals, {new: true}, function (err, results) {
+    User.findOneAndUpdate({_id:id}, newVals, {new: true}, function (err, results) {
 
         if (!err) {
             if (results) {
                 var tmpU=JSON.parse(JSON.stringify(results));
                 console.log("new user:"+ util.inspect(tmpU));
                 delete tmpU['__v'];
-                delete tmpU['_id'];
+                //delete tmpU['_id'];
                     res.status(200).send(tmpU);
             }
             else {
@@ -792,7 +792,7 @@ router.post('/:id/actions/resetpassword',[jwtMiddle.decodeToken], function(req, 
 
                             if (!usr)callback({err_code:404, error: 'NotFound', error_message: "no User found whith " + id + " email"},'one');
 
-                            id = usr.id;
+                            id = usr._id;
                             callback(null, 'one');
                         });
 
@@ -922,7 +922,7 @@ router.post('/:id/actions/setpassword',[jwtMiddle.decodeToken],function(req, res
 
                             if (!usr)callback({err_code:404, error: 'NotFound', error_message: "no User found whith " + id + " email"},'one');
 
-                            id = usr.id;
+                            id = usr._id;
                             callback(null, 'one');
                         });
 
@@ -1188,7 +1188,7 @@ router.delete('/:id',[jwtMiddle.decodeToken],function(req, res) {
         if(error) {
             return  res.status(500).send({error:'internal_User_microservice_error', error_message : error +""});
         }else{
-            User.findOneAndRemove({id:id},  function(err, results){
+            User.findOneAndRemove({_id:id},  function(err, results){
                 console.log("deleted "+util.inspect(results));
                 if(!err){
                     if (results){

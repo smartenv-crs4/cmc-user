@@ -141,6 +141,7 @@ describe('Users API', function () {
         async.each(range, function (e, cb) {
 
             Users.create({
+                _id : new mongoose.Types.ObjectId,
                 email:"email" + e + "@email.it",
                 name:"name" +e,
                 surname:"surname"+e,
@@ -379,7 +380,7 @@ describe('Users API', function () {
                 var results = JSON.parse(response.body);
                 results.should.have.property('access_credentials');
                 results.should.have.property('created_resource');
-                clientId=results.created_resource.id; // nedeed to cancel user
+                clientId=results.created_resource._id; // nedeed to cancel user
             }
             callb(results.access_credentials.apiKey.token || null);
         });
@@ -396,6 +397,7 @@ describe('Users API', function () {
                     request.get({url:url,headers:{'Authorization' : "Bearer "+ token}},function(error, response, body){
                         if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
                         else{
+                            console.log(body);
                             response.statusCode.should.be.equal(200);
                             var results = JSON.parse(response.body);
                             results.should.have.property('email');

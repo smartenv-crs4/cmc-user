@@ -85,6 +85,7 @@ describe('SignUpIn API', function () {
         async.each(range, function (e, cb) {
 
             Users.create({
+                _id : new mongoose.Types.ObjectId,
                 email:"email" + e + "@email.it",
                 name:"name" +e,
                 surname:"surname"+e
@@ -220,7 +221,7 @@ describe('SignUpIn API', function () {
 
     describe('POST /authuser/signin', function () {
 
-        it('should not login a Authuser no signUP User', function (done) {
+        it('should not login a Authuser no registered User', function (done) {
             var user = {
                 "name": "Micio",
                 "username": "mario@caport.com",
@@ -313,7 +314,7 @@ describe('SignUpIn API', function () {
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
                     results.should.have.property('created_resource');
-                    clientId=results.created_resource.id; // nedeed to cancel user
+                    clientId=results.created_resource._id; // nedeed to cancel user
 
                     var url = APIURL + '/signin';
                     var user = {
@@ -367,7 +368,7 @@ describe('SignUpIn API', function () {
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
                     results.should.have.property('created_resource');
-                    clientId=results.created_resource.id; // nedeed to cancel user
+                    clientId=results.created_resource._id; // nedeed to cancel user
 
                     var url = APIURL + '/signin';
                     var user = {
@@ -418,7 +419,7 @@ describe('SignUpIn API', function () {
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
                     results.should.have.property('created_resource');
-                    clientId=results.created_resource.id; // nedeed to cancel user
+                    clientId=results.created_resource._id; // nedeed to cancel user
 
                     var url = APIURL + '/signin';
                     var user = {
@@ -469,7 +470,7 @@ describe('SignUpIn API', function () {
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
                     results.should.have.property('created_resource');
-                    clientId=results.created_resource.id; // nedeed to cancel user
+                    clientId=results.created_resource._id; // nedeed to cancel user
                 }
                 done();
             });
@@ -500,7 +501,7 @@ describe('SignUpIn API', function () {
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
                     results.should.have.property('created_resource');
-                    clientId=results.created_resource.id; // nedeed to cancel user
+                    clientId=results.created_resource._id; // nedeed to cancel user
 
                     var url = APIURL + '/signin';
                     var user = {
@@ -812,7 +813,7 @@ describe('SignUpIn API', function () {
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
                     results.should.have.property('created_resource');
-                    clientId=results.created_resource.id; // nedeed to cancel user
+                    clientId=results.created_resource._id; // nedeed to cancel user
 
                     // make a reset
                     //var url = APIURL+'/'+results.userId+"/actions/resetpassword";
@@ -857,7 +858,7 @@ describe('SignUpIn API', function () {
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
                     results.should.have.property('created_resource');
-                    clientId=results.created_resource.id; // nedeed to cancel user
+                    clientId=results.created_resource._id; // nedeed to cancel user
 
                     // make a reset
                     //var url = APIURL+'/'+results.userId+"/actions/resetpassword";
@@ -902,7 +903,7 @@ describe('SignUpIn API', function () {
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
                     results.should.have.property('created_resource');
-                    clientId=results.created_resource.id; // nedeed to cancel user
+                    clientId=results.created_resource._id; // nedeed to cancel user
 
                     // make a reset
                     var url = APIURL+'/'+clientId+"/actions/resetpassword";
@@ -1024,7 +1025,7 @@ describe('SignUpIn API', function () {
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
                     results.should.have.property('created_resource');
-                    clientId=results.created_resource.id; // nedeed to cancel user
+                    clientId=results.created_resource._id; // nedeed to cancel user
                     var user = {
                         "username": "mario@caport.com",
                         "password": "miciomicio"

@@ -36,6 +36,7 @@ describe('MS Auth Model', function(){
 
 
         User.create({
+            _id : new mongoose.Types.ObjectId,
             email:"email" + e + "@email.it",
             name:"name" +e,
             surname:"surname"+e

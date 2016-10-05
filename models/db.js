@@ -55,7 +55,7 @@ function createDefaultUser(callb){
                         if (err) return callb("ERROR",500,{error:"internal_microservice_error",error_message : err +""});
                         if(!val){
                             var id = defUser.users[0]._id;
-                            conf.AdminDefaultUser.id=id;
+                            conf.AdminDefaultUser._id=id;
                             Users.create(conf.AdminDefaultUser, function (err, newUser) {
                                 if (err) {
                                     return callb("ERROR", 500, {error: "internal_microservice_error", error_message: err + ""});
