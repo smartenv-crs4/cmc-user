@@ -8,57 +8,54 @@ var User = require('../models/users').User;
  * @apiName Configuration
  * @apiGroup Configuration
  *
- * @apiDescription This section describe configuration File fields
+ * @apiDescription This section lists the configuration parameters of the microservice
  *
- *
- * @apiParam {Number} dbPort Contains the mongoDb Port number
- * @apiParam {String} dbHost Contains the mongoDb Host name
- * @apiParam {String} dbName Contains the mongoDb database name
- * @apiParam {Number} limit  Contains the default limit param used to paginate get response
- * @apiParam {Number} skip   Contains the default skip param used to paginate get response
- * @apiParam {String} logfile where to save log information
- * @apiParam {Array} SignUpAuthorizedAppAndMS Contains a list of Strings speciging signup Authorized app Type(defined in AuthMS)  as in the next example --> ["webUi"]
- * @apiParam {Array} SignInAuthorizedAppAndMS Contains a list of Strings speciging login  Authorized app Type(defined in AuthMS)  as in the next example --> ["webUi"]
+ * @apiParam {Number} dbPort mongoDb Port number
+ * @apiParam {String} dbHost mongoDb Host name
+ * @apiParam {String} dbName mongoDb database name
+ * @apiParam {Number} limit  default limit param used to paginate get response
+ * @apiParam {Number} skip   default skip param used to paginate get response
+ * @apiParam {String} logfile log file path
+ * @apiParam {Array} SignUpAuthorizedAppAndMS a list of signup authorized App types (defined in AuthMS) e.g. ["webUi"]
+ * @apiParam {Array} SignInAuthorizedAppAndMS a list of login  authorized App types (defined in AuthMS) e.g. ["webUi"]
  * @apiParam {String} microserviceAuthMS  BaseUrl of AuthMs microservices
- * @apiParam {String} MyMicroserviceToken String containig the token for this Application microservice. To get it regiter this Ms in AuthMs
- * @apiParam {Array} adminUser Contains a list of Strings Admin User Type(defined in AuthMS) as in the next example --> ["admin"]
- * @apiParam {Object} AdminDefaultUser Object containig the default admin user to create in users.
- * @apiParam {Object} UserSchema Object containig the mongoDb Schema of Users. if not specified it use a Schema defined in models/users.js
- *
- *
+ * @apiParam {String} MyMicroserviceToken the token for this Application microservice. To get it register this Ms in AuthMs
+ * @apiParam {Array} adminUser a list of admin User types (defined in AuthMS) e.g. ["admin"]
+ * @apiParam {Object} AdminDefaultUser Object containing the default admin user
+ * @apiParam {Object} UserSchema Object containig the mongoDb Schema of Users. If not set, a schema defined in models/users.js will be used
  */
 
 
 //Middleware to parse DB query fields selection from request URI
 //Adds dbQueryFields to request
-exports.parseFields = function(req, res, next){
+exports.parseFields = function (req, res, next) {
 
-  var fields = req.query.fields ? req.query.fields.split(","):null;
-  if(fields){
+    var fields = req.query.fields ? req.query.fields.split(",") : null;
+    if (fields) {
         req.dbQueryFields = fields.join(' ');
-  }
-  else{
+    }
+    else {
         req.dbQueryFields = null;
-  }
-  next();
+    }
+    next();
 
 };
 
 
 //Middleware to parse pagination params from request URI
 //Adds dbPagination to request
-exports.parsePagination = function(req, res, next){
+exports.parsePagination = function (req, res, next) {
 
-  var skip = req.query.skip && !isNaN(parseInt(req.query.skip)) ? parseInt(req.query.skip):conf.skip;
-  var limit = req.query.limit && parseInt(req.query.limit) < conf.limit ? parseInt(req.query.limit):conf.limit;
-  req.dbPagination = {"skip":skip, "limit":limit};
-  next();
+    var skip = req.query.skip && !isNaN(parseInt(req.query.skip)) ? parseInt(req.query.skip) : conf.skip;
+    var limit = req.query.limit && parseInt(req.query.limit) < conf.limit ? parseInt(req.query.limit) : conf.limit;
+
+    req.dbPagination = {"skip": skip, "limit": limit};
+    next();
 
 };
 
 
 exports.ensureUserIsAdminOrSelf = function(req,res,next){
-
     
     var id = (req.params.id).toString();
 
@@ -69,7 +66,24 @@ exports.ensureUserIsAdminOrSelf = function(req,res,next){
         return res.status(401).send({ error: "Forbidden",error_message:'only ' +conf.adminUser+' or self user are authorized to access the resource. your Token Id:' +req.User_App_Token._id + " searchId:"+id});
     else
         next();
+
 };
+
+
+exports.parseOptions = function (req, res, next) {
+
+    var sortDescRaw = req.query.sortDesc ? req.query.sortDesc.split(",") : null;
+    var sortAscRaw = req.query.sortAsc ? req.query.sortAsc.split(",") : null;
+
+    if (sortAscRaw || sortDescRaw)
+        req.sort = {asc: sortAscRaw, desc: sortDescRaw};
+    else
+        req.sort = null;
+
+    next();
+
+};
+
 //
 //
 // exports.ensureUserIsAdmin = function(req,res,next){
@@ -148,19 +162,3 @@ exports.ensureUserIsAdminOrSelf = function(req,res,next){
 //     else
 //         next();
 // };
-
-
-exports.parseOptions = function(req, res, next){
-
-    var sortDescRaw = req.query.sortDesc ? req.query.sortDesc.split(",") : null;
-    var sortAscRaw = req.query.sortAsc ? req.query.sortAsc.split(",") : null;
-
-
-    if(sortAscRaw || sortDescRaw)
-        req.sort={ asc:sortAscRaw, desc:sortDescRaw};
-    else
-        req.sort = null;
-
-    next();
-};
-
