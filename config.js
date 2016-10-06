@@ -18,7 +18,7 @@ var config = {
         limit:50,
         skip:0,
         logfile:"/var/log/caport2020User-Microservice.log",
-        adminUser:["admin"],
+        //adminUser:["admin"],
         microserviceAuthMS:"http://localhost:3005",
         MyMicroserviceToken:testCustomizableParams.usermsToken,
         AdminDefaultUser : {
@@ -78,10 +78,10 @@ var config = {
         limit:50,
         skip:0,
         logfile:"/var/log/caport2020User-Microservice.log",
-        adminUser:["admin", "userms"],
+        //adminUser:["admin", "userms"],
         //defaultAdminUser:"admin@admin.com",
-        SignUpAuthorizedAppAndMS:["webuiMS"], // signUp
-        SignInAuthorizedAppAndMS:["webuiMS"], // Login
+        //SignUpAuthorizedAppAndMS:["webuiMS"], // signUp
+        //SignInAuthorizedAppAndMS:["webuiMS"], // Login
         microserviceAuthMS:"http://localhost:3005",
         MyMicroserviceToken:"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoibXMiLCJpc3MiOiJub3QgdXNlZCBmbyBtcyIsImVtYWlsIjoibm90IHVzZWQgZm8gbXMiLCJ0eXBlIjoidXNlcm1zIiwiZW5hYmxlZCI6dHJ1ZSwiZXhwIjoxNzg5OTkzNzM5MjU0fQ.-8ZeJjQbzjXRYaMo6NN0uYGxg9mXCUqjVmwhWqSG4N8",
         //MyMicroserviceToken:"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoibXMiLCJpc3MiOiJub3QgdXNlZCBmbyBtcyIsImVtYWlsIjoibm90IHVzZWQgZm8gbXMiLCJ0eXBlIjoiVXNlcnNTZXJ2aWNlIiwiZW5hYmxlZCI6dHJ1ZSwiZXhwIjoxNzgxNTQwOTUzMDg4fQ.s-TB-bKM4pGorAb2J4axkVHUrwEGLmtOF4vJpx6bt-M",

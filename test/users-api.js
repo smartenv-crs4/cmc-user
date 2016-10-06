@@ -107,7 +107,7 @@ describe('Users API', function () {
                 if (error) console.log("######  2 ERRORE should  login a Authuser: " + error +"  ######");
                 else {
                     console.log("GET ADMIN TOKEN " + body);
-                    response.statusCode.should.be.equal(201);
+                    response.statusCode.should.be.equal(200);
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
                     adminToken=results.access_credentials.apiKey.token;
@@ -610,7 +610,7 @@ describe('Users API', function () {
                                 if (error) console.log("######  2 ERRORE should  login a Authuser: " + error +"  ######");
                                 else {
 
-                                    response.statusCode.should.be.equal(201);
+                                    response.statusCode.should.be.equal(200);
                                     var url = APIURL+'/'+clientId+"?fields=name";
                                     request.get({url:url,headers:{'Authorization' : "Bearer "+ tokenUtente}},function(error, response, body){
                                         if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");

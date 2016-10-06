@@ -330,7 +330,7 @@ describe('SignUpIn API', function () {
                     }, function (error, response) {
                         if (error) console.log("######  2 ERRORE should  login a Authuser: " + error +"  ######");
                         else {
-                            response.statusCode.should.be.equal(201);
+                            response.statusCode.should.be.equal(200);
                             var results = JSON.parse(response.body);
                             results.should.have.property('access_credentials');
                             results.access_credentials.should.have.property('userId');
@@ -825,7 +825,7 @@ describe('SignUpIn API', function () {
                         if(error) console.log("######   ERRORE: " + error + "  ######");
                         else{
                             console.log("ERR Reset: " + body);
-                            response.statusCode.should.be.equal(201);
+                            response.statusCode.should.be.equal(200);
                             var results = JSON.parse(response.body);
                             results.should.have.property('reset_token');
                             done();
@@ -913,7 +913,7 @@ describe('SignUpIn API', function () {
                     },function(error, response, body){
                         if(error) console.log("######   ERRORE: " + error + "  ######");
                         else{
-                            response.statusCode.should.be.equal(201);
+                            response.statusCode.should.be.equal(200);
                             var results = JSON.parse(response.body);
                             results.should.have.property('reset_token');
                             var reset_token=results.reset_token;
@@ -932,7 +932,7 @@ describe('SignUpIn API', function () {
                                 if (error) console.log("######  ERRORE should  login a Authuser: " + error +"  ######");
                                 else {
                                     console.log("Access_cred SIgn=" + body);
-                                    response.statusCode.should.be.equal(201);
+                                    response.statusCode.should.be.equal(200);
                                     var results = JSON.parse(response.body);
                                     results.should.have.property('access_credentials');
                                     results.access_credentials.should.have.property('userId');
@@ -986,7 +986,7 @@ describe('SignUpIn API', function () {
                                                     }, function (error, response) {
                                                         if (error) console.log("######  ERRORE should  login a Authuser: " + error +"  ######");
                                                         else {
-                                                            response.statusCode.should.be.equal(201);
+                                                            response.statusCode.should.be.equal(200);
                                                             var results = JSON.parse(response.body);
                                                             results.should.have.property('access_credentials');
                                                             results.access_credentials.should.have.property('userId');
@@ -1039,7 +1039,7 @@ describe('SignUpIn API', function () {
                     }, function (error, response) {
                         if (error) console.log("######  ERRORE should  login a Authuser: " + error +"  ######");
                         else {
-                            response.statusCode.should.be.equal(201);
+                            response.statusCode.should.be.equal(200);
                             var results = JSON.parse(response.body);
                             results.should.have.property('access_credentials');
                             results.access_credentials.should.have.property('userId');
@@ -1092,7 +1092,7 @@ describe('SignUpIn API', function () {
                                             }, function (error, response) {
                                                 if (error) console.log("######  ERRORE should  login a Authuser: " + error +"  ######");
                                                 else {
-                                                    response.statusCode.should.be.equal(201);
+                                                    response.statusCode.should.be.equal(200);
                                                     var results = JSON.parse(response.body);
                                                     results.should.have.property('access_credentials');
                                                     results.access_credentials.should.have.property('userId');
