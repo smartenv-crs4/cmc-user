@@ -102,13 +102,14 @@ exports.setAuthMsMicroservice=function(doneCallback){
 
             var appBody = JSON.stringify({app:conf.testConfig.webUiAppTest});
 
+
             request.post({
                 url: url + "/authapp/signup",
                 body: appBody,
                 headers: {'content-type': 'application/json', 'Authorization': "Bearer " + conf.MyMicroserviceToken}
             }, function (error, response,body) {
                 if(error) {
-                    throw err;
+                    throw error;
                     callback(error,null);
                 }else{
                     var results = JSON.parse(response.body);
@@ -116,7 +117,6 @@ exports.setAuthMsMicroservice=function(doneCallback){
                         conf.testConfig.myWebUITokenToSignUP = results.apiKey.token;
                         conf.testConfig.webUiID=results.userId;
                     }
-
                     callback(null,"five");
                 }
             });

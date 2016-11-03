@@ -1,6 +1,3 @@
-
-var User = require('../models/users').User;
-var jwt = require('jwt-simple');
 var mytoken=require('../config').conf;
 var request = require('request');
 var _=require("underscore");
