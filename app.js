@@ -4,7 +4,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var LocalStrategy = require('passport-local').Strategy;
 
-var config = require('./config').generalConf;
+var conf = require('propertiesmanager').conf;
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -14,14 +14,14 @@ var User = require('./models/users').User;
 
 
 var app = express();
-var conf = null;
-
-if (app.get('env') === 'dev') {
-    conf = config.dev;
-}
-else{
-    conf = config.production;
-}
+// var conf = null;
+//
+// if (app.get('env') === 'dev') {
+//     conf = config.dev;
+// }
+// else{
+//     conf = config.production;
+// }
 //require('./models/db')
 //connect to DB
 ///...
