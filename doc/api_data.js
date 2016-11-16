@@ -70,8 +70,8 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "microserviceAuthMS",
-            "description": "<p>BaseUrl of AuthMs microservices</p> "
+            "field": "authHost",
+            "description": "<p>Host of AuthMs microservices</p> "
           },
           {
             "group": "Parameter",
