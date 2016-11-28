@@ -77,8 +77,8 @@
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "MyMicroserviceToken",
-            "description": "<p>String containig the token for this Application microservice. To get it regiter this Ms in AuthMs</p> "
+            "field": "auth_token",
+            "description": "<p>String containig the token for this Application microservice. To get it register this Ms in AuthMs</p> "
           },
           {
             "group": "Parameter",

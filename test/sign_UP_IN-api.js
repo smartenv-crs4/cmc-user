@@ -16,7 +16,7 @@ var APIURL = 'http://localhost:' + Port +"/users" ;
 
 var clientUser;
 var clientId;
-var MStoken = conf.MyMicroserviceToken;
+var MStoken = conf.auth_token;
 var userStandard = conf.testConfig.userTypeTest;
 
 

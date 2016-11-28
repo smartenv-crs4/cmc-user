@@ -11,7 +11,7 @@ var comminFunctions=require("./commonfunctions");
 var async=require('async');
 
 var microserviceBaseURL=conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort;
-var microserviceTokem=conf.MyMicroserviceToken;
+var microserviceTokem=conf.auth_token;
 
 router.use(middlewares.parsePagination);
 router.use(middlewares.parseFields);

@@ -16,7 +16,7 @@ exports.createUserAsAdmin = function(user,callb) {
 
     var rqparams={
         url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser/signup',
-        headers : {'Authorization' : "Bearer "+ conf.MyMicroserviceToken, 'content-type': 'application/json'},
+        headers : {'Authorization' : "Bearer "+ conf.auth_token, 'content-type': 'application/json'},
         body:JSON.stringify({user:loginUser})
     };
 
@@ -41,7 +41,7 @@ exports.createUserAsAdmin = function(user,callb) {
                     if(err){
                         rqparams={
                             url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser/' + user._id,
-                            headers : {'Authorization' : "Bearer "+ conf.MyMicroserviceToken}
+                            headers : {'Authorization' : "Bearer "+ conf.auth_token}
                         };
 
                         request.delete(rqparams, function(error, response, body) {
@@ -72,7 +72,7 @@ exports.createUserAsAdmin = function(user,callb) {
 exports.setConfig= function(callback){
     var rqparams={
         url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + "/tokenactions/getsupeusertokenlist",
-        headers : {'Authorization' : "Bearer "+ conf.MyMicroserviceToken}
+        headers : {'Authorization' : "Bearer "+ conf.auth_token}
     };
 
     request.get(rqparams, function(error, response, body){

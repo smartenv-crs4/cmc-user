@@ -25,7 +25,7 @@ function createDefaultUser(callb){
 
     var rqparams={
         url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser?email=' + conf.AdminDefaultUser.email,
-        headers : {'Authorization' : "Bearer "+ conf.MyMicroserviceToken, 'content-type': 'application/json'},
+        headers : {'Authorization' : "Bearer "+ conf.auth_token, 'content-type': 'application/json'},
     };
 
     console.log("signUp request param, "+JSON.stringify(rqparams));

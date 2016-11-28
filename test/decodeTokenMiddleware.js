@@ -9,7 +9,7 @@ var util = require('util');
 var Port = 3010;
 var APIURL = 'http://localhost:' + Port +"/users" ;
 
-var MStoken = conf.MyMicroserviceToken;
+var MStoken = conf.auth_token;
 //var token=conf.testConfig.myWebUITokenToSignUP;
 var type = conf.userType;
 
