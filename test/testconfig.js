@@ -13,7 +13,7 @@ function customTestConfig(config){
 
     
     
-    testConfig.myWebUITokenToSignUP=config.MyMicroserviceToken;
+    testConfig.myWebUITokenToSignUP=config.auth_token;
     testConfig.userTypeTest={
                         "name": "Micio",
                         "email": "mario@caport.com",

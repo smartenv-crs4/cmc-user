@@ -26,7 +26,7 @@ var clientId;
 
 
 
-var MStoken = conf.MyMicroserviceToken;
+var MStoken = conf.auth_token;
 var userStandard = conf.testConfig.userTypeTest;
 var commonFunctioTest=require("./testCommonfunctions");
 
@@ -347,7 +347,7 @@ describe('Users API', function () {
 
 
     function deleteFromAuth(id,done){
-        var url = conf.microserviceAuthMS+'/authuser/'+id;
+        var url = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser/' + id;
         clientId=null;
         request.delete({
             url: url,

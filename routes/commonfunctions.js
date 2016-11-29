@@ -15,8 +15,8 @@ exports.createUserAsAdmin = function(user,callb) {
     };
 
     var rqparams={
-        url:conf.microserviceAuthMS+'/authuser/signup',
-        headers : {'Authorization' : "Bearer "+ conf.MyMicroserviceToken, 'content-type': 'application/json'},
+        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser/signup',
+        headers : {'Authorization' : "Bearer "+ conf.auth_token, 'content-type': 'application/json'},
         body:JSON.stringify({user:loginUser})
     };
 
@@ -40,8 +40,8 @@ exports.createUserAsAdmin = function(user,callb) {
                 User.create(user,function(err,newUser){
                     if(err){
                         rqparams={
-                            url:conf.microserviceAuthMS+'/authuser/' + user._id,
-                            headers : {'Authorization' : "Bearer "+ conf.MyMicroserviceToken}
+                            url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser/' + user._id,
+                            headers : {'Authorization' : "Bearer "+ conf.auth_token}
                         };
 
                         request.delete(rqparams, function(error, response, body) {
@@ -71,12 +71,13 @@ exports.createUserAsAdmin = function(user,callb) {
 
 exports.setConfig= function(callback){
     var rqparams={
-        url:conf.microserviceAuthMS+ "/tokenactions/getsupeusertokenlist",
-        headers : {'Authorization' : "Bearer "+ conf.MyMicroserviceToken}
+        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + "/tokenactions/getsupeusertokenlist",
+        headers : {'Authorization' : "Bearer "+ conf.auth_token}
     };
 
     request.get(rqparams, function(error, response, body){
-
+        console.log("async first");
+        console.dir(body);
         if(error) {
             callback({error:'internal_User_microservice_error', error_message : error +""},null);
 

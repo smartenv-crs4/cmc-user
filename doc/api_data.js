@@ -70,14 +70,14 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "microserviceAuthMS",
-            "description": "<p>BaseUrl of AuthMs microservices</p> "
+            "field": "authHost",
+            "description": "<p>Host of AuthMs microservices</p> "
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "MyMicroserviceToken",
+            "field": "auth_token",
             "description": "<p>String containig the token for this Application microservice. To get it regiter this Ms in AuthMs</p> "
           },
           {

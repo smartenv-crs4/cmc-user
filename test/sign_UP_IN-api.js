@@ -16,7 +16,7 @@ var APIURL = 'http://localhost:' + Port +"/users" ;
 
 var clientUser;
 var clientId;
-var MStoken = conf.MyMicroserviceToken;
+var MStoken = conf.auth_token;
 var userStandard = conf.testConfig.userTypeTest;
 
 
@@ -114,7 +114,7 @@ describe('SignUpIn API', function () {
 
 
     function deleteFromAuth(id,done){
-        var url = conf.microserviceAuthMS+'/authuser/'+id;
+        var url = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser/'+id;
         clientId=null;
         request.delete({
             url: url,

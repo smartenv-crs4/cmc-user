@@ -24,11 +24,11 @@ var options = {
 function createDefaultUser(callb){
 
     var rqparams={
-        url:conf.microserviceAuthMS+'/authuser?email='+conf.AdminDefaultUser.email,
-        headers : {'Authorization' : "Bearer "+ conf.MyMicroserviceToken, 'content-type': 'application/json'},
+        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser?email=' + conf.AdminDefaultUser.email,
+        headers : {'Authorization' : "Bearer "+ conf.auth_token, 'content-type': 'application/json'},
     };
 
-    //console.log("signUp request param"+JSON.stringify(rqparams));
+    console.log("signUp request param, "+JSON.stringify(rqparams));
 
 
 
@@ -44,6 +44,7 @@ function createDefaultUser(callb){
                     return callb("ERROR", 500, {error: "InternalError", error_message:"No Default Admin in AuthMs microservice"});
                 });
             }else{
+                console.dir(body);
                 var defUser = JSON.parse(body);
                 if(!_.isEmpty(defUser.error)){
                     return callb("ERROR", response.statusCode, {error: defUser.error, error_message: defUser.error_message})
