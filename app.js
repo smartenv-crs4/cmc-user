@@ -10,10 +10,9 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var User = require('./models/users').User;
 
-
-
-
 var app = express();
+var plugin=require('apiextender');
+plugin.extend(app);
 // var conf = null;
 //
 // if (app.get('env') === 'dev') {
