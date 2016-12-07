@@ -12,7 +12,7 @@ var User = require('./models/users').User;
 
 var app = express();
 var plugin=require('apiextender');
-plugin.extend(app);
+
 // var conf = null;
 //
 // if (app.get('env') === 'dev') {
@@ -46,7 +46,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/doc', express.static('doc',{root:'doc'}));
 
 //app.use(logger('[:mydate] :method :url :status :res[content-length] - :remote-addr - :response-time ms'));
-
+plugin.extend(app);
 app.use('/', routes);
 app.use('/users',users); //users and cars
 //app.use('/auth', auth); // authorization routes

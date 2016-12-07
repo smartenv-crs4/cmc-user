@@ -24,7 +24,8 @@ var userSch= conf.UserSchema || {
             validate: [validateEmail, 'Please fill a valid email address'],
             match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']
         },
-        avatar:String,
+        avatar: String,
+        ckan_apikey: String,
         // password: String,  // passportLocalMongoose manage hash and salt information
         notes: String
     };
