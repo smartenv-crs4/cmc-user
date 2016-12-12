@@ -1,13 +1,12 @@
 var express = require('express');
 
-
 var plugins = [
     {
-        "resource": "/users",
+        "resource": "/users/signup",
         "method": "POST",
         "mode": "before_after",
         "enabled": false,
-        "params": ["body"],
+        "params": ["body","ckan_username"],
         "extender": {
             'before': function (req, content, cType, callback) {
                 var par = ["email", "password"];
@@ -40,11 +39,11 @@ var plugins = [
                         body: JSON.stringify(body)
                     };
                     request.post(options, function (err,res,cBody) {
-
                         var b = JSON.parse(cBody);
-                        if (err)
-                            console.log(err);
-                        req.body.user.ckan_apikey = b.result.apikey;
+                        if (b.result && b.result.apikey) {
+                            req.body.user.ckan_apikey = b.result.apikey;
+                            req.ckan_username = name;
+                        }
                         callback(err, req);
                     });
                 }
@@ -52,9 +51,16 @@ var plugins = [
             'after': function (req, content, cType, callback) {
                 var request = require("request");
                 if (content.error) {
-                    request.delete("http://seitre.crs4.it/api/3/action/user_delete",
-                                    {id: req.body.user.username}, function (err,res,cBody) {
-                                        callback(err, {});
+                    var options = {
+                        url: 'http://seitre.crs4.it/api/3/action/user_delete',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': '9e15a233-30ea-4676-a70e-6cc70477c85e'
+                        },
+                        body: JSON.stringify({id: req.ckan_username})
+                    };
+                    request.post(options, function (err,res,cBody) {
+                        callback({error_code:400, error_message: {error:content.error,error_message:content.error_message}}, null);
                     });
                 }
                 else

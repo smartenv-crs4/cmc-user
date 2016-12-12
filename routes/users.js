@@ -130,7 +130,7 @@ router.use(middlewares.parseFields);
 /**
  * @api {post} /users/signup Register a new User
  * @apiVersion 1.0.0
- * @apiName Create User
+ * @apiName Sign Up User
  * @apiGroup Users
  *
  * @apiDescription Accessible by access tokens of type specified in "SignUpAuthorizedAppAndMS" field in config.js. Creates a new User object and returns the access credentials.
