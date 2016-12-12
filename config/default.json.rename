@@ -1,0 +1,43 @@
+{
+  "dev":{
+    "dbHost":"your_db_host",
+    "dbPort":"27017",
+    "dbName":"CP2020USERDEV",
+    "limit":50,
+    "skip":0,
+    "logfile":"/var/log/caport2020User-Microservice.log",
+    "authProtocol":"http",
+    "authHost":"your_auth_service_host",
+    "authPort":"3000",
+    "auth_token":"your_auth_service_token",
+    "AdminDefaultUser" : {
+      "name": "Admin",
+      "email": "admin@admin.com",
+      "surname":"Admin"
+    },
+    "testConfig":{
+      "usertokens":["UserType1"],
+      "adminokens":["admin"],
+      "authApptokens":["webui"]
+    }
+  },
+
+  "production":{
+    "dbHost":"your_db_host",
+    "dbPort":"27017",
+    "dbName":"CP2020USER",
+    "limit":50,
+    "skip":0,
+    "logfile":"/var/log/caport2020User-Microservice.log",
+    "authProtocol":"http",
+    "authHost":"your_auth_service_host",
+    "authPort":"3000",
+    "auth_token":"your_auth_service_token",
+    "AdminDefaultUser" : {
+      "name": "Admin",
+      "email": "admin@admin.com",
+      "surname":"Admin"
+    }
+
+  }
+}
