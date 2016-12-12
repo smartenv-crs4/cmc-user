@@ -1,0 +1,43 @@
+{
+  "dev":{
+    "dbHost":"localhost",
+    "dbPort":"27017",
+    "dbName":"CP2020USERDEV",
+    "limit":50,
+    "skip":0,
+    "logfile":"/var/log/caport2020User-Microservice.log",
+    "authProtocol":"http",
+    "authHost":"localhost",
+    "authPort":"3005",
+    "auth_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoibXMiLCJpc3MiOiJub3QgdXNlZCBmbyBtcyIsImVtYWlsIjoibm90IHVzZWQgZm8gbXMiLCJ0eXBlIjoidXNlcm1zIiwiZW5hYmxlZCI6dHJ1ZSwiZXhwIjoxNzg5OTk2OTE5MzEyfQ.P78RVNGK9m0pY1nehyDGd8v-q28y_43GMECluzNTbEw",
+    "AdminDefaultUser" : {
+      "name": "Admin",
+      "email": "admin@admin.com",
+      "surname":"Admin"
+    },
+    "testConfig":{
+      "usertokens":["UserType1"],
+      "adminokens":["admin"],
+      "authApptokens":["webui"]
+    }
+  },
+
+  "production":{
+    "dbHost":"localhost",
+    "dbPort":"27017",
+    "dbName":"CP2020USER",
+    "limit":50,
+    "skip":0,
+    "logfile":"/var/log/caport2020User-Microservice.log",
+    "authProtocol":"http",
+    "authHost":"localhost",
+    "authPort":"3005",
+    "auth_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoibXMiLCJpc3MiOiJub3QgdXNlZCBmbyBtcyIsImVtYWlsIjoibm90IHVzZWQgZm8gbXMiLCJ0eXBlIjoidXNlcm1zIiwiZW5hYmxlZCI6dHJ1ZSwiZXhwIjoxNzg5OTk2OTE5MzEyfQ.P78RVNGK9m0pY1nehyDGd8v-q28y_43GMECluzNTbEw",
+    "AdminDefaultUser" : {
+        "name": "Admin",
+        "email": "admin@admin.com",
+        "surname":"Admin"
+    }
+
+  }
+}
