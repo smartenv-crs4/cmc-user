@@ -437,9 +437,9 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res) {
 
 
 /**
- * @api {post} /users/ Register a new User
+ * @api {post} /users/ Register a new Admin User
  * @apiVersion 1.0.0
- * @apiName Create User
+ * @apiName Create Admin User
  * @apiGroup Users
  *
  * @apiDescription Accessible by access tokens of admin type. Creates a new User object and returns the access credentials.
