@@ -82,7 +82,7 @@ describe('Decode Token Midleware API', function () {
 
 
     function deleteFromAuth(id,done){
-        var url = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser/'+id;
+        var url = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + conf.apiGwAuthBaseUrl + "/" + conf.apiVersion + '/authuser/'+id;
         clientId=null;
         request.delete({
             url: url,

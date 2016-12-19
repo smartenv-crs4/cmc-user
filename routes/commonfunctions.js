@@ -15,7 +15,7 @@ exports.createUserAsAdmin = function(user,callb) {
     };
 
     var rqparams={
-        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser/signup',
+        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + conf.apiGwAuthBaseUrl + "/" + conf.apiVersion + '/authuser/signup',
         headers : {'Authorization' : "Bearer "+ conf.auth_token, 'content-type': 'application/json'},
         body:JSON.stringify({user:loginUser})
     };
@@ -40,7 +40,7 @@ exports.createUserAsAdmin = function(user,callb) {
                 User.create(user,function(err,newUser){
                     if(err){
                         rqparams={
-                            url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser/' + user._id,
+                            url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + conf.apiGwAuthBaseUrl + "/" + conf.apiVersion + '/authuser/' + user._id,
                             headers : {'Authorization' : "Bearer "+ conf.auth_token}
                         };
 
@@ -71,7 +71,7 @@ exports.createUserAsAdmin = function(user,callb) {
 
 exports.setConfig= function(callback){
     var rqparams={
-        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + "/tokenactions/getsupeusertokenlist",
+        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + conf.apiGwAuthBaseUrl + "/" + conf.apiVersion + "/tokenactions/getsupeusertokenlist",
         headers : {'Authorization' : "Bearer "+ conf.auth_token}
     };
 

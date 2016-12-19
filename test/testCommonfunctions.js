@@ -10,7 +10,7 @@ var app = require('../app');
 var Port = 3010;
 
 
-var authHost = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort;
+var authHost = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
 
 
 exports.setAuthMsMicroservice=function(doneCallback){

@@ -10,7 +10,7 @@ var request = require('request');
 var comminFunctions=require("./commonfunctions");
 var async=require('async');
 
-var microserviceBaseURL=conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort;
+var microserviceBaseURL=conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
 var microserviceTokem=conf.auth_token;
 
 router.use(middlewares.parsePagination);

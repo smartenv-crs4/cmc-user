@@ -24,7 +24,7 @@ var options = {
 function createDefaultUser(callb){
 
     var rqparams={
-        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + '/authuser?email=' + conf.AdminDefaultUser.email,
+        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + conf.apiGwAuthBaseUrl + "/" + conf.apiVersion + '/authuser?email=' + conf.AdminDefaultUser.email,
         headers : {'Authorization' : "Bearer "+ conf.auth_token, 'content-type': 'application/json'},
     };
 
