@@ -8,9 +8,12 @@ var db = require("../models/db");
 var server;
 var app = require('../app');
 var Port = 3010;
+var _=require("underscore");
 
+var gwExist=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+gwExist=_.isEmpty(conf.apiVersion) ? gwExist : gwExist + "/" + conf.apiVersion;
 
-var authHost = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+var authHost = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gwExist;
 
 
 exports.setAuthMsMicroservice=function(doneCallback){

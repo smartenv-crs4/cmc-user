@@ -2,6 +2,7 @@
 var conf=require('../config').conf;
 var util=require('util');
 var User = require('../models/users').User;
+var _=require("underscore");
 var request=require('request');
 
 
@@ -14,8 +15,10 @@ exports.createUserAsAdmin = function(user,callb) {
         "type":user.type
     };
 
+    var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+    gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
     var rqparams={
-        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + conf.apiGwAuthBaseUrl + "/" + conf.apiVersion + '/authuser/signup',
+        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gw + '/authuser/signup',
         headers : {'Authorization' : "Bearer "+ conf.auth_token, 'content-type': 'application/json'},
         body:JSON.stringify({user:loginUser})
     };
@@ -39,8 +42,10 @@ exports.createUserAsAdmin = function(user,callb) {
 
                 User.create(user,function(err,newUser){
                     if(err){
+                        var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+                        gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
                         rqparams={
-                            url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + conf.apiGwAuthBaseUrl + "/" + conf.apiVersion + '/authuser/' + user._id,
+                            url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gw + '/authuser/' + user._id,
                             headers : {'Authorization' : "Bearer "+ conf.auth_token}
                         };
 
@@ -70,8 +75,10 @@ exports.createUserAsAdmin = function(user,callb) {
 
 
 exports.setConfig= function(callback){
+    var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+    gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
     var rqparams={
-        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + conf.apiGwAuthBaseUrl + "/" + conf.apiVersion + "/tokenactions/getsupeusertokenlist",
+        url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gw + "/tokenactions/getsupeusertokenlist",
         headers : {'Authorization' : "Bearer "+ conf.auth_token}
     };
 
