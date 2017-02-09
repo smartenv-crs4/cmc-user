@@ -10,7 +10,7 @@ var app = require('../app');
 var Port = 3010;
 var _=require("underscore");
 
-var gwExist=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+var gwExist=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
 gwExist=_.isEmpty(conf.apiVersion) ? gwExist : gwExist + "/" + conf.apiVersion;
 
 var authHost = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gwExist;

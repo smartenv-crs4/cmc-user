@@ -347,7 +347,7 @@ describe('Users API', function () {
 
 
     function deleteFromAuth(id,done){
-        var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+        var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
         gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
         var url = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gw + '/authuser/' + id;
         clientId=null;

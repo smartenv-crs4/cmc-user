@@ -10,7 +10,7 @@ var request = require('request');
 var comminFunctions=require("./commonfunctions");
 var async=require('async');
 
-var gwExists=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+var gwExists=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
 gwExists=_.isEmpty(conf.apiVersion) ? gwExists : gwExists + "/" + conf.apiVersion;
 var microserviceBaseURL=conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gwExists;
 var microserviceTokem=conf.auth_token;

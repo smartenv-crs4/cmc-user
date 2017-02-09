@@ -23,7 +23,7 @@ var options = {
 
 function createDefaultUser(callb){
 
-    var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+    var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
     gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
     var rqparams={
         url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gw + '/authuser?email=' + conf.AdminDefaultUser.email,

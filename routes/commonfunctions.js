@@ -15,7 +15,7 @@ exports.createUserAsAdmin = function(user,callb) {
         "type":user.type
     };
 
-    var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+    var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
     gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
     var rqparams={
         url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gw + '/authuser/signup',
@@ -42,7 +42,7 @@ exports.createUserAsAdmin = function(user,callb) {
 
                 User.create(user,function(err,newUser){
                     if(err){
-                        var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+                        var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
                         gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
                         rqparams={
                             url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gw + '/authuser/' + user._id,
@@ -75,7 +75,7 @@ exports.createUserAsAdmin = function(user,callb) {
 
 
 exports.setConfig= function(callback){
-    var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl + "/" + conf.apiVersion;
+    var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
     gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
     var rqparams={
         url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gw + "/tokenactions/getsupeusertokenlist",
