@@ -129,6 +129,36 @@ router.use(middlewares.parseFields);
 // End Macro
 
 
+//###################################### PROPERTIES FILE DEFAULT.JSON #######################################################
+/**
+ * @api Configuration Fields
+ * @apiVersion 1.0.0
+ * @apiName Configuration
+ * @apiGroup Configuration
+ *
+ * @apiDescription This section lists the configuration parameters of the microservice
+ *
+ * @apiParam {Number} dbPort mongoDb Port number
+ * @apiParam {String} dbHost mongoDb Host name
+ * @apiParam {String} dbName mongoDb database name
+ * @apiParam {Number} limit  default limit param used to paginate get response
+ * @apiParam {Number} skip   default skip param used to paginate get response
+ * @apiParam {String} logfile log file path *
+ * @apiParam {String} authProtocol protocol used to call authms microservice resource
+ * @apiParam {String} authHost authms microservice ip or host name
+ * @apiParam {String} authPort port used to call authms microservice resource
+ * @apiParam {String} apiGwAuthBaseUrl API gateway base url. Mandatory only if a gateway exist in architecture
+ * @apiParam {String} apiVersion auth ms API version
+ * @apiParam {String} auth_token token used to call auth ms
+ * @apiParam {Object} AdminDefaultUser admin Admin default user dictionary.The admin default user is registered when the microservice is run
+ * @apiParam {String} AdminDefaultUser.name Admin Name
+ * @apiParam {String} AdminDefaultUser.email Admin username
+ * @apiParam {String} AdminDefaultUser.surname Admin surname
+ */
+//###################################### PROPERTIES FILE DEFAULT.JSON #######################################################
+
+
+
 /**
  * @api {post} /users/signup Register a new User
  * @apiVersion 1.0.0
@@ -137,21 +167,32 @@ router.use(middlewares.parseFields);
  *
  * @apiDescription Accessible by access tokens of type specified in "SignUpAuthorizedAppAndMS" field in config.js. Creates a new User object and returns the access credentials.
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
- * @apiParam {String} user the user dictionary with all the fields. Email, password and type are mandatory
+ * @apiParam {Object} user the user dictionary with all the fields. email, password and type are mandatory
+ * @apiParam {String} user.email email user email valid as username to login
+ * @apiParam {String} user.password password user password
+ * @apiParam {String} user.type type user type. for example admin, cruiser...
+ * @apiParam {String} user.name [name] user name
+ * @apiParam {String} application.avatar [avatar] user avatar image id in uploadms
+ * @apiParam {String} application.notes [notes] user notes
  *
  * @apiParamExample {json} Request-Example:
  * HTTP/1.1 POST request
  *  Body:{ "email": "prov@prova.it" , "password":"provami", "type":"crocierista", "name":"nome", "surname":"cognome"}
  *
- * @apiSuccess (201 - CREATED) {Object} access_credentials  contains information about access credentials
+ * @apiSuccess (201 - CREATED) {Object} access_credentials contains information about access credentials
  * @apiSuccess (201 - CREATED) {Object} access_credentials.apiKey  contains information about apiKey
  * @apiSuccess (201 - CREATED) {String} access_credentials.apiKey.token  user Token
  * @apiSuccess (201 - CREATED) {String} access_credentials.apiKey.expires  token expiration date
  * @apiSuccess (201 - CREATED) {Object} access_credentials.refreshToken  contains information about refreshToken used to renew token
  * @apiSuccess (201 - CREATED) {String} access_credentials.refreshToken.token  user refreshToken
  * @apiSuccess (201 - CREATED) {String} access_credentials.refreshToken.expires  refreshToken expiration date
- * @apiSuccess (201 - CREATED) {Object} Created_resource contains the created User resource
+ * @apiSuccess (201 - CREATED) {Object} Created_resource contains the created User resource dictionary
  * @apiSuccess (201 - CREATED) {String} Created_resource.UserField_1  field 1 defined in User Schema (e.g. name)
  * @apiSuccess (201 - CREATED) {String} Created_resource.UserField_2  field 2 defined in User Schema (e.g. surname)
  * @apiSuccess (201 - CREATED) {String} Created_resource.UserField_N  field N defined in User Schema (e.g. type)
@@ -302,6 +343,11 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
  *
  * @apiDescription Accessible by access tokens of type specified in "SignInAuthorizedAppAndMS" field in config.js. Logs in the User and returns the access credentials.
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
  * @apiParam {String} username the user email
  * @apiParam {String} password the user password
@@ -317,6 +363,7 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
  * @apiSuccess (200 - OK) {Object} access_credentials.refreshToken  contains information about refreshToken used to renew token
  * @apiSuccess (200 - OK) {String} access_credentials.refreshToken.token  user refreshToken
  * @apiSuccess (200 - OK) {String} access_credentials.refreshToken.expires  refreshToken expiration date
+ * @apiSuccess (200 - OK) {String} access_credentials.userId  user _id that identifies it.
  *
  * @apiSuccessExample {json} Example: 201 CREATED
  *      HTTP/1.1 201 CREATED
@@ -330,6 +377,7 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
  *                          "token":"eQO7de4AJe-syk",
  *                          "expires":1467394099074
  *                   }
+ *                   "userId":"34324JHGJ89787"
  *        }
  *      }
  *
@@ -390,8 +438,13 @@ router.post('/signin', [jwtMiddle.decodeToken], function (req, res) {
  * @apiGroup Users
  *
  * @apiDescription Accessible by admin user access tokens specified "adminUser" field in config.js. Returns the paginated list of all Users.
- * Set pagination skip and limit in the URL request, e.g. "get /users?skip=10&limit=50"
+ * Set pagination skip and limit and other filters in the URL request, e.g. "get /users?skip=10&limit=50&name=Mario"
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
  * @apiParam {String} UserField_1 query field 2 used to set filter, e.g. name = "User Name"
  * @apiParam {String} UserField_2 query field 2 used to set filter, e.g. Filed2 = "Field Value"
@@ -446,8 +499,19 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res) {
  *
  * @apiDescription Accessible by access tokens of admin type. Creates a new User object and returns the access credentials.
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
- * @apiParam {String} user the user dictionary with all the fields. Email, password and type are mandatory
+ * @apiParam {Object} user the user dictionary with all the fields. email, password and type are mandatory
+ * @apiParam {String} user.email email user email valid as username to login
+ * @apiParam {String} user.password password user password
+ * @apiParam {String} user.type type user type. for example admin, cruiser...
+ * @apiParam {String} user.name [name] user name
+ * @apiParam {String} application.avatar [avatar] user avatar image id in uploadms
+ * @apiParam {String} application.notes [notes] user notes
  *
  * @apiParamExample {json} Request-Example:
  * HTTP/1.1 POST request
@@ -460,7 +524,7 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res) {
  * @apiSuccess (201 - CREATED) {Object} access_credentials.refreshToken  contains information about refreshToken used to renew token
  * @apiSuccess (201 - CREATED) {String} access_credentials.refreshToken.token  user refreshToken
  * @apiSuccess (201 - CREATED) {String} access_credentials.refreshToken.expires  refreshToken expiration date
- * @apiSuccess (201 - CREATED) {Object} Created_resource  contains the created User resourcce
+ * @apiSuccess (201 - CREATED) {Object} Created_resource  contains the created User resource
  * @apiSuccess (201 - CREATED) {String} Created_resource.UserField_1  field 1 defined in User Schema (e.g. name)
  * @apiSuccess (201 - CREATED) {String} Created_resource.UserField_2  field 2 defined in User Schema (e.g. surname)
  * @apiSuccess (201 - CREATED) {String} Created_resource.UserField_N  field N defined in User Schema (e.g. type)
@@ -531,8 +595,13 @@ router.post('/', [jwtMiddle.decodeToken], function (req, res) {   //FIXME: repla
  *
  * @apiDescription Accessible by admin access tokens or by the user itself. Returns the info about a User.
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
- * @apiParam {String} id the user id or username (email)
+ * @apiParam {String} id (URL param) the user id or username (email)
  *
  * @apiSuccess {String} user.id User id
  * @apiSuccess {String} user.field1 fiend 1 defined in schema
@@ -590,9 +659,20 @@ router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
  *
  * @apiDescription Accessible by admin access tokens or by the user itself. Creates a new User object and returns the updated resource.
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
- * @apiParam {String-URL} id the user id or username (email)
- * @apiParam {Object} user the user dictionary with all the fields to update. Email (username) field can be updated only by admin token; for password there is a dedicated endpoint; user type cannot be updated
+ * @apiParam {String} id (URL param) the user id or username (email)
+ * @apiParam {Object} user (Body param) the user dictionary with all the fields to update. Email (username) field can be updated only by admin token; for password and enable user, there is a dedicated endpoint
+ * @apiParam {String} user.email email user email valid as username to login
+ * @apiParam {String} user.password password user password
+ * @apiParam {String} user.type type user type. for example admin, cruiser... only admin token can update user type to admin user
+ * @apiParam {String} user.name [name] user name
+ * @apiParam {String} application.avatar [avatar] user avatar image id in uploadms
+ * @apiParam {String} application.notes [notes] user notes
  *
  * @apiParamExample {json} Request-Example:
  * HTTP/1.1 PUT request
@@ -642,6 +722,10 @@ router.put('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
     }
     if (!(conf.adminUser.indexOf(req.User_App_Token.type) >= 0) && newVals.email) {
         return res.status(401).send({error: "Forbidden", error_message: 'only admins users can update email'});
+    }
+
+    if (!(conf.adminUser.indexOf(req.User_App_Token.type) >= 0) && newVals.type && (conf.adminUser.indexOf(newVals.type) >= 0)) {
+        return res.status(401).send({error: "Forbidden", error_message: 'only admins users can update user type to admin user'});
     }
 
     User.findOneAndUpdate({_id:id}, newVals, {new: true}, function (err, results) {
@@ -698,8 +782,13 @@ function enableDisable(req, res, value) {
  *
  * @apiDescription Accessible by admin or AuthApp access tokens define in config.js. Creates a reset password Token.
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
- * @apiParam {String} id the user id or username (email)
+ * @apiParam {String} id (URL param) the user id or username (email)
  *
  * @apiSuccess (200 - OK) {String} reset_token  grant token to set the new password
  *
@@ -787,11 +876,16 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
  *
  * @apiDescription Accessible by access_token, It update user password. To call this endpoint must have a reset_token (used with authorized app or admin token) or must be the User itself.
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
- * @apiParam {String-URL} id the user id or username (email)
- * @apiParam {String-BODY} oldpassword the old password to update. If set, reset_token must be undefined
- * @apiParam {String-BODY} newpassword the new password
- * @apiParam {String-BODY} reset_token this token is used to update password. Must be undefined if oldpassword is set
+ * @apiParam {String} id (URL param) the user id or username (email)
+ * @apiParam {String} oldpassword (BODY param) the old password to update. If set, reset_token must be undefined
+ * @apiParam {String} newpassword (BODY param) the new password
+ * @apiParam {String} reset_token (BODY param) this token is used to update password. If set, oldpassword must be undefined
  *
  * @apiParamExample {json} Request-Example:
  * HTTP/1.1 GET request
@@ -804,6 +898,7 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
  * @apiSuccess (200 - OK) {Object} access_credentials.refreshToken  contains information about refreshToken used to renew token
  * @apiSuccess (200 - OK) {String} access_credentials.refreshToken.token  user refreshToken
  * @apiSuccess (200 - OK) {String} access_credentials.refreshToken.expires  refreshToken expiration date
+ * @apiSuccess (200 - OK) {String} access_credentials.userId  user _id that identifies it.
  *
  * @apiSuccessExample {json} Example: 200 OK
  *      HTTP/1.1 200 OK
@@ -816,7 +911,8 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
  *                  "refreshToken":{
  *                          "token":"eQO7de4AJe-syk",
  *                          "expires":1467394099074
- *                   }
+ *                   },
+ *                   "userId":"343242354FDGH%"
  *        }
  *      }
  *
@@ -962,9 +1058,14 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
  *
  * @apiDescription Accessible by admin access tokens. Creates a new userId (email) used to login.
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
- * @apiParam {String-URL} id the user id or username (email)
- * @apiParam {String-URL} email the new username (email)
+ * @apiParam {String} id (URL param) the user id or username (email)
+ * @apiParam {String} email (BODY param) the new username (email)
  *
  * @apiParamExample {json} Request-Example:
  * HTTP/1.1 GET request
@@ -991,7 +1092,10 @@ router.post('/:id/actions/changeuserid', [jwtMiddle.decodeToken], function (req,
     var id = (req.params.id).toString();
     req.url = "/" + id;
 
-    var body = {user: req.body};
+    if(!req.body || !req.body.email)
+        return res.status(400).send({error:"BadRequest", error_message:"no email field in body. email are mandatory"});
+
+    var body = {user: {email:req.body.email}};
     req.body = body;
 
     req.method = "PUT";
@@ -1013,8 +1117,13 @@ router.post('/:id/actions/changeuserid', [jwtMiddle.decodeToken], function (req,
  *
  * @apiDescription Accessible by admin access tokens. Enables the user.
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
- * @apiParam {String} id the user id
+ * @apiParam {String} id (URL param) the user id
  *
  * @apiSuccess (200 - OK) {String} status  the new user status
  *
@@ -1045,8 +1154,13 @@ router.post('/:id/actions/enable', [jwtMiddle.decodeToken], function (req, res) 
  *
  * @apiDescription Accessible by admin access tokens. Disables the user.
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
- * @apiParam {String} id the user id
+ * @apiParam {String} id (URL param) the user id
  *
  * @apiSuccess (201 - Created) {String} status  contains the new user status
  *
@@ -1077,8 +1191,13 @@ router.post('/:id/actions/disable', [jwtMiddle.decodeToken], function (req, res)
  * @apiDescription Accessible by admin access tokens. Deletes User and returns the deleted resource.
  * To call this endpoint must have an admin token.
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
- * @apiParam {String} id the user id
+ * @apiParam {String} id (URL param) the user id
  *
  * @apiSuccess (204 - NO CONTENT) {String} UserField_1  field 1 updated and defined in User Schema (e.g. name)
  * @apiSuccess (204 - NO CONTENT) {String} UserField_2  field 2 updated and defined in User Schema (e.g. surname)
@@ -1148,9 +1267,15 @@ router.delete('/:id', [jwtMiddle.decodeToken], function (req, res) {
  * @apiDescription Accessible by admin access_token. Returns the paginated list of all Users matching the search term to username..
  * Set pagination skip and limit, in the URL request, e.g. "get /users?skip=10&limit=50"
  *
+ * @apiHeader {String} Authorization  Unique access_token. It is not mandatory and can be sent as body or url param
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
  * @apiParam {String} access_token access token that grants access to this resource. It must be sent in [ body || as query param || header]
- * @apiParam {String} skip  the pagination start
- * @apiParam {String} limit the number of elements
+ * @apiParam {String} term (URL Param) search key
+ * @apiParam {String} skip  (Query param) the pagination start
+ * @apiParam {String} limit (Query param) the number of elements
  *
  * @apiUse Metadata
  * @apiUse GetResource
