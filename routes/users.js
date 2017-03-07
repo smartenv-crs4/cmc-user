@@ -621,7 +621,7 @@ router.post('/', [jwtMiddle.decodeToken], function (req, res) {   //FIXME: repla
  * @apiName GetUser
  * @apiGroup Users
  *
- * @apiDescription Accessible by admin access tokens or by the user itself. Returns the info about a User.
+ * @apiDescription Accessible by admin access tokens or by the user itself, returns the info about a User.
  *
  * @apiHeader {String} [Authorization] Unique access_token. If set, the same access_token in body or in query param must be undefined
  * @apiHeaderExample {json} Header-Example:
@@ -632,10 +632,10 @@ router.post('/', [jwtMiddle.decodeToken], function (req, res) {   //FIXME: repla
  * if set, the same  token sent in Authorization header should be undefined
  * @apiParam (URL Parameter) {String} id the user id or username (email)
  *
- * @apiSuccess {String} user.id User id
- * @apiSuccess {String} user.field1 fiend 1 defined in schema
- * @apiSuccess {String} user.field2 fiend 2 defined in schema
- * @apiSuccess {String} user.fieldN fiend N defined in schema
+ * @apiSuccess {String} id User id
+ * @apiSuccess {String} field1 fiend 1 defined in schema
+ * @apiSuccess {String} field2 fiend 2 defined in schema
+ * @apiSuccess {String} fieldN fiend N defined in schema
  * @apiSuccessExample {json} Example: 200 OK, Success Response
  *     {
  *        "id": "543fdd60579e1281b8f6da92",
@@ -654,8 +654,6 @@ router.post('/', [jwtMiddle.decodeToken], function (req, res) {   //FIXME: repla
 router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf], function (req, res) {
     //TODO: must be changed to return only authorized users
     //given an authenticated user (by token)
-
-    console.log("################################# get /:ID");
 
     var fields = req.dbQueryFields;
     if (!fields)
@@ -1106,7 +1104,7 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
  *
  * @apiSuccess (200- OK) {Object} user dictionary with new updated username(email)
  *
- * @apiSuccessExample {json} Example: 201 CREATED
+ * @apiSuccessExample {json} Example: 200 OK
  *      HTTP/1.1 200 OK
  *      {
  *        "name":"Micio",
@@ -1299,7 +1297,7 @@ router.delete('/:id', [jwtMiddle.decodeToken], function (req, res) {
  * @apiName SEARCH User
  * @apiGroup Users
  *
- * @apiDescription Accessible by admin access_token. Returns the paginated list of all Users matching the search term to username..
+ * @apiDescription Accessible by admin access_token, returns the paginated list of all Users matching the search term
  * Set pagination skip and limit, in the URL request, e.g. "get /users?skip=10&limit=50"
  *
  * @apiHeader {String} [Authorization] Unique access_token. If set, the same access_token in body or in query param must be undefined
