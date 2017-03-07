@@ -1,3 +1,5 @@
+
+
 {
   "name": "Caport2020UserAPI",
   "version": "1.0.0",
@@ -39,6 +41,7 @@
     "footer": {
       "title": "Maintained by CRS4",
       "filename": "footer.md"
-    }
+    },
+    "sampleUrl":"localhost:3010"
   }
 }
