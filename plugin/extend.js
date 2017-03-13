@@ -68,8 +68,10 @@ var plugins = [
                         callback({error_code:400, error_message: {error:content.error,error_message:content.error_message}}, null);
                     });
                 }
-                else
+                else {
+                    content.created_resource.ckan_username = req.ckan_username; //set here because it is not saved in the DB
                     callback(null, content);
+                }
             }
         }
     },
