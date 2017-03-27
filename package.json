@@ -33,7 +33,7 @@
   },
   "apidoc": {
     "title": "Caport2020User API",
-    "url": "https://cp2020.crs4.it/v1",
+    "url": "http://smartapi.crs4.it/user/v1",
     "header": {
       "title": "API Overview",
       "filename": "header.md"
@@ -42,6 +42,6 @@
       "title": "Maintained by CRS4",
       "filename": "footer.md"
     },
-    "sampleUrl":"localhost:3010"
+    "sampleUrl":"http://smartapi.crs4.it/api/userdemo/v1"
   }
 }
