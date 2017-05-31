@@ -1,5 +1,3 @@
-
-
 {
   "name": "Caport2020UserAPI",
   "version": "1.0.0",
@@ -32,8 +30,9 @@
     "should": "^4.0.4"
   },
   "apidoc": {
-    "title": "Caport2020User API",
-    "url": "http://smartapi.crs4.it/user/v1",
+    "name": "Cagliari Port 2020 User API",
+    "title": "Caport2020UserAPI",
+    "url": "http://smartapi.crs4.it/api/user/v1",
     "header": {
       "title": "API Overview",
       "filename": "header.md"

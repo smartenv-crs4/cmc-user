@@ -1,10 +1,10 @@
-For more info about the project, please visit the [CagliariPortt2020 official website](http://cp2020.crs4.it)
+For more info about the project, please visit the [Cagliari Port 2020 official website](http://cp2020.crs4.it)
 
 Security & Authentication
 -------------------------
 All API endpoints use **HTTPS** protocol.
 
-All API endpoints **MUST require authentication**.
+All API endpoints **require authentication**.
 
 
 
@@ -57,6 +57,10 @@ Access_Token to try API
   <tr>
     <td class="tg-baqh">Application Token Type</td>
     <td class="tg-baqh">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.<br>eyJtb2RlIjoiZGV2ZWxvcGVyIiwiaXNzIjoiNThjNmQyNGMxMWFmMTA4MWY2OTYwZTE3I<br>iwiZW1haWwiOiJwaXBwbzZAcGlwcG8uaXQiLCJ0eXBlIjoiYWRtaW5BcHAiLCJlbmFibGVkIjp0cnVlLCJleHAiOjE0OTAwMjk3NzMwNzh9.<br>jXivXxjnOlbFVBiLpdS1em2__EvS08Ms4pf5jtVz9Mo</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">Microservice Token Type</td>
+    <td class="tg-baqh">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoibXMiLCJpc3MiOiJub3QgdXNlZCBmbyBtcyIsImVtYWlsIjoibm90IHVz<br>ZWQgZm8gbXMiLCJ0eXBlIjoidXNlcm1zLWRlbW8iLCJlbmFibGVkIjp0cnVlLCJleHAiOjE4MDYyMjgyOTE0NTR9.<br>YWku3TNMUqBpVzPKvj99o34gHRlPZiG51YWiqY1WTc8</td>
   </tr>
 </table>
 
