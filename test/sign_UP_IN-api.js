@@ -434,9 +434,16 @@ describe('SignUpIn API', function () {
                         url: url,
                         body: userBody,
                         headers: {'content-type': 'application/json', 'Authorization': "Bearer " + results.access_credentials.apiKey.token}
-                    }, function (error, response) {
+                    }, function (error, response,body) {
                         if (error) console.log("######  2 ERRORE should not login a Authuser bad User: " + error +"  ######");
                         else {
+                            // console.log("###################################################################");
+                            // console.log("###################################################################");
+                            // console.log("###################################################################");
+                            // console.log("###################################################################");
+                            // console.log("###################################################################");
+                            // //console.log(req.body);
+                            // console.log("Body:------>" +body);
                             response.statusCode.should.be.equal(401);
                             var results = JSON.parse(response.body);
                             results.should.have.property('error');

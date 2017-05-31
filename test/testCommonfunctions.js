@@ -135,7 +135,7 @@ exports.setAuthMsMicroservice=function(doneCallback){
                 };
                 //console.log("ROLE: " + value.method + " ---> " + value.URI);
                 request.post(rqparams, function(error, response, body){
-                    //console.log(body);
+                    console.log(body);
                     if(error) {
                         throw err;
                         clb("err");

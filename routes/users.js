@@ -252,6 +252,7 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
     // if(req.user.valid){ //if ot valid retuen in jwtaut midleware
     //  if(conf.SignUpAuthorizedAppAndMS.indexOf(req.User_App_Token.type)>=0 ){ // se il token è di un app che può fare login
 
+
     if (!req.body || _.isEmpty(req.body))  return res.status(400).send({
         error: "no_body",
         error_message: 'request body missing'
@@ -277,6 +278,8 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
         "password":user.password,
         "type":user.type
     };
+
+
 
     var rqparams = {
         url: microserviceBaseURL + '/authuser/signup',
@@ -582,8 +585,8 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res) {
  * @apiUse BadRequest
  * @apiUse ServerError
  */
-//router.post('/',[middlewares.ensureUserIsAdmin], function(req, res) {   //FIXME: replace with signup???
-router.post('/', [jwtMiddle.decodeToken], function (req, res) {   //FIXME: replace with signup???
+//router.post('/',[middlewares.ensureUserIsAdmin], function(req, res) {
+router.post('/', [jwtMiddle.decodeToken], function (req, res) {
                                                                   //Authorized just admins
 
     // if(req.user.valid){ //if ot valid retuen in jwtaut midleware
@@ -842,27 +845,46 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
                 if (id.indexOf("@") >= 0) { // è un ndirizzo email
                     if (id.search(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/igm) >= 0) { // è una mail valida
                         User.findOne({email: id}, function (err, usr) {
-                            if (err) callback({err_code: 500, error: 'internal_error', error_message: err + ""}, 'one');
+                            if (err) return callback({err_code: 500, error: 'internal_error', error_message: err + ""}, 'one');
 
-                            if (!usr)callback({
+                             if (_.isEmpty(usr)) return callback({
                                 err_code: 404,
                                 error: 'NotFound',
                                 error_message: "no User found whith " + id + " email"
                             }, 'one');
 
                             id = usr._id;
-                            callback(null, 'one');
+                            return callback(null, 'one');
                         });
 
                     } else { // non è na mail valida
-                        callback({
+                        return callback({
                             err_code: 400,
                             error: 'BadRequest',
                             error_message: "Please fill a valid email address"
                         }, 'one');
                     }
                 } else {
-                    callback(null, 'one'); // ho passto l'id utente e non lo username
+
+                    User.findById(id, function (err, usr) {
+                        if (err){
+                            if(err.name== 'CastError')
+                                return callback({err_code: 400, error: 'BdRequest', error_message: "Invalid user id or username (email)"}, 'one');
+                            else
+                                return callback({err_code: 500, error: 'internal_error', error_message: err + ""}, 'one');
+                        }
+
+                        if (_.isEmpty(usr)) return callback({
+                            err_code: 404,
+                            error: 'NotFound',
+                            error_message: "no User found whith id " + id
+                        }, 'one');
+
+
+                        return callback(null, 'one'); // ho passto l'id utente e non lo username
+                    });
+
+
                 }
             }
         ],

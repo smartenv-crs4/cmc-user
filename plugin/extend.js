@@ -6,7 +6,7 @@ var plugins = [
         "resource": "/users/signup",
         "method": "POST",
         "mode": "before_after",
-        "enabled": true,
+        "enabled": false,
         "params": ["body","ckan_username"],
         "extender": {
             'before': function (req, content, cType, callback) {

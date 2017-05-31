@@ -163,6 +163,8 @@ describe('Decode Token Midleware API', function () {
                 var url = APIURL + '/signup';
                 var results;
 
+
+
                 request.post({
                     url: url,
                     body: userBody,
@@ -170,8 +172,16 @@ describe('Decode Token Midleware API', function () {
                 }, function (error, response,body) {
                     if (error) console.log("######   ERRORE 401 1: " + error + "  ######");
                     else {
-                        console.log("SendenToken: " + conf.testConfig.myWebUITokenToSignUP );
-                        console.log("UnauthorizesToken: " + body );
+
+                        // console.log("#################################################################################");
+                        // console.log("#################################################################################");
+                        // console.log("#################################################################################");
+                        // console.log("#################################################################################");
+                        // console.log("#################################################################################");
+                        // console.log("#################################################################################" + url);
+                        // console.log(userStandard);
+                        // console.log("SendenToken: " + conf.testConfig.myWebUITokenToSignUP );
+                        // console.log("UnauthorizesToken: " + body );
                         response.statusCode.should.be.equal(201);
                         var results = JSON.parse(response.body);
                         results.should.have.property('access_credentials');

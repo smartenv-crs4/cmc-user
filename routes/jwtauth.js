@@ -5,8 +5,6 @@ var _=require("underscore");
 exports.decodeToken = function(req, res, next) {
 
 
-    console.log("decodeToken");
-
     var token = (req.body && req.body.access_token) || (req.query && req.query.access_token); // || req.headers['x-access-token'];
     if (req.headers['authorization']) {
         var value = req.headers['authorization'];
