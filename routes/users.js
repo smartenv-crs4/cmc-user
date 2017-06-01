@@ -1097,7 +1097,12 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
                             error_message: error + ""
                         });
                     } else {
-                        return res.status(201).send({"access_credentials": JSON.parse(body)});
+                        var parsedBody=JSON.parse(body);
+                        if(parsedBody.error){
+                            return res.status(response.statusCode).send(parsedBody);
+                        }else {
+                            return res.status(201).send({"access_credentials": JSON.parse(body)});
+                        }
                     }
                 });
             }
