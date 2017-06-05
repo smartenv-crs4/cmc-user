@@ -912,7 +912,6 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
                             error_message: error + ""
                         });
                     } else {
-                        //TODO send Email
                         return res.status(200).send(body);
                     }
                 });
@@ -1057,6 +1056,7 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
 
                         } else {
                             var appT = JSON.parse(body).user;
+                            // if is admin user or ms
                             if (_.without(appT, conf.adminUser).indexOf(req.User_App_Token.type) >= 0) {
                                 callback({
                                     err_code: 401,
