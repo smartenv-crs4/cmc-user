@@ -1,19 +1,37 @@
+/*
+ ############################################################################
+ ############################### GPL III ####################################
+ ############################################################################
+ *                         Copyright 2017 CRS4                                 *
+ *       This file is part of CRS4 Microservice Core - User (CMC-User).       *
+ *                                                                            *
+ *       CMC-Auth is free software: you can redistribute it and/or modify     *
+ *     it under the terms of the GNU General Public License as published by   *
+ *       the Free Software Foundation, either version 3 of the License, or    *
+ *                    (at your option) any later version.                     *
+ *                                                                            *
+ *       CMC-Auth is distributed in the hope that it will be useful,          *
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ *               GNU General Public License for more details.                 *
+ *                                                                            *
+ *       You should have received a copy of the GNU General Public License    *
+ *       along with CMC-User.  If not, see <http://www.gnu.org/licenses/>.    *
+ * ############################################################################
+ */
+
+
 var should = require('should');
 var commonFunctioTest=require("./testCommonfunctions");
 var mongoose = require('mongoose');
 var _ = require('underscore')._;
 var async = require('async');
-//var db = require("../models/db");
 var Users = require('../models/users').User;
 var conf = require('../config').conf;
 var request = require('request');
-//var app = require('../app');
 var util = require('util');
 var Port = 3010;
 var APIURL = 'http://localhost:' + Port +"/users" ;
-//var server;
-
-
 var clientUser;
 var clientId;
 var MStoken = conf.auth_token;
@@ -23,38 +41,6 @@ var userStandard = conf.testConfig.userTypeTest;
 
 describe('SignUpIn API', function () {
 
-    // before(function (done) {
-    //     //this.timeout(4000);
-    //     //
-    //     //console.log("BEFORE");
-    //     db.connect(function (err) {
-    //         if (err) console.log("######   ERRORE BEFORE : " + err +"  ######");
-    //
-    //         app.set('port', process.env.PORT || Port);
-    //
-    //         server = app.listen(app.get('port'), function () {
-    //             console.log('TEST Express server listening on port ' + server.address().port);
-    //             done();
-    //         });
-    //     });
-    // });
-    //
-    // after(function (done) {
-    //     //console.log("AFTER");
-    //     Users.remove({}, function (err,elm) {
-    //         if (err) console.log("######   ERRORE After 1: " + err +"  ######");
-    //         db.disconnect(function (err,res) {
-    //             if (err) console.log("######   ERRORE After 2: " + err +"  ######");
-    //             done();
-    //         });
-    //         server.close();
-    //     });
-    // });
-    //
-    //
-
-
-
     before(function (done) {
         commonFunctioTest.setAuthMsMicroservice(function(err){
             if(err) throw (err);
@@ -63,7 +49,6 @@ describe('SignUpIn API', function () {
     });
 
     after(function (done) {
-        //console.log("AFTER");
         Users.remove({}, function (err,elm) {
             if (err) console.log("######   ERRORE After 1: " + err +"  ######");
             commonFunctioTest.resetAuthMsStatus(function(err){
@@ -80,8 +65,6 @@ describe('SignUpIn API', function () {
 
         var range = _.range(100);
 
-        //Add cars
-       // console.log("BEFORE EACH");
         async.each(range, function (e, cb) {
 
             Users.create({
@@ -91,7 +74,6 @@ describe('SignUpIn API', function () {
                 surname:"surname"+e
             }, function (err, newuser) {
                 if (err) console.log("######   ERRORE BEFOREEACH: " + err +"  ######");
-                //console.log(e);
                 if(e==1) clientUser=newuser._id;
                 cb();
             });
@@ -103,7 +85,6 @@ describe('SignUpIn API', function () {
 
 
     afterEach(function (done) {
-        //console.log("AFTER EACH");
         Users.remove({}, function (err, elm) {
             if (err) console.log("######   ERRORE AfterEach: " + err +"  ######");
             if(clientId)
@@ -114,16 +95,13 @@ describe('SignUpIn API', function () {
 
 
     function deleteFromAuth(id,done){
-        var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
-        gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
-        var url = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gw + '/authuser/'+id;
+        var url = conf.authUrl + '/authuser/'+id;
         clientId=null;
         request.delete({
             url: url,
             headers: {'content-type': 'application/json', 'Authorization': "Bearer " + MStoken}
         },function(error, response, body){
             if(error) {
-                console.log("######   ERRORE: " + error + "  ######");
                 done();
             }
             else{
@@ -137,7 +115,6 @@ describe('SignUpIn API', function () {
     describe('POST /signin', function () {
 
         it('should not login a Authuser no body sended', function (done) {
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signin';
             
             request.post({
@@ -149,7 +126,6 @@ describe('SignUpIn API', function () {
                     console.log("######   ERRORE should not login a Authuser no body sended: " + error +"  ######");
                 }
                 else {
-                    console.log("testBody " +body);
                     response.statusCode.should.be.equal(400);
                     var results = JSON.parse(response.body);
                     results.should.have.property('error');
@@ -166,7 +142,6 @@ describe('SignUpIn API', function () {
 
         it('should not login a Authuser no username sended', function (done) {
             var userBody = JSON.stringify(userStandard);
-           // console.log("BODY " + userBody);
             var url = APIURL + '/signin';
             request.post({
                 url: url,
@@ -195,12 +170,10 @@ describe('SignUpIn API', function () {
         it('should not login a Authuser no password sended', function (done) {
             var user = {
                 "name": "Micio",
-                "email": "mario@caport.com",
-               // "password": "miciomicio",
+                "email": "mario@cmc.com",
                 "surname":"Macio"
             };
             var userBody = JSON.stringify(user);
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signin';
             request.post({
                 url: url,
@@ -226,12 +199,11 @@ describe('SignUpIn API', function () {
         it('should not login a Authuser no registered User', function (done) {
             var user = {
                 "name": "Micio",
-                "username": "mario@caport.com",
+                "username": "mario@cmc.com",
                 "password": "miciomicio",
                 "surname":"Macio"
             };
             var userBody = JSON.stringify(user);
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signin';
             request.post({
                 url: url,
@@ -240,7 +212,6 @@ describe('SignUpIn API', function () {
             }, function (error, response,body) {
                 if (error) console.log("######   ERRORE should not login a Authuser invalid username sended: " + error +"  ######");
                 else {
-                    console.log(body);
                     response.statusCode.should.be.equal(403);
                     var results = JSON.parse(response.body);
                     results.should.have.property('error');
@@ -261,15 +232,12 @@ describe('SignUpIn API', function () {
 
             var user = {
                 "name": "Micio",
-                "email": "mario@caport.com",
+                "email": "mario@cmc.com",
                 "password": "miciomicio",
                 "surname":"Macio"
             };
 
-
-
             var userBody = JSON.stringify({user:user});
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signup';
             request.post({
                 url: url,
@@ -278,7 +246,6 @@ describe('SignUpIn API', function () {
             }, function (error, response,body) {
                 if (error) console.log("######  1 ERRORE should  login a Authuser: " + error +"  ######");
                 else {
-                    console.log(body);
                     response.statusCode.should.be.equal(400);
                     var results = JSON.parse(response.body);
                     results.should.have.property('error');
@@ -299,10 +266,7 @@ describe('SignUpIn API', function () {
 
         it('should login a Authuser', function (done) {
 
-
-
             var userBody = JSON.stringify({user:userStandard});
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signup';
             request.post({
                 url: url,
@@ -311,7 +275,6 @@ describe('SignUpIn API', function () {
             }, function (error, response,body) {
                 if (error) console.log("######  1 ERRORE should  login a Authuser: " + error +"  ######");
                 else {
-                    console.log(body);
                     response.statusCode.should.be.equal(201);
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
@@ -320,7 +283,7 @@ describe('SignUpIn API', function () {
 
                     var url = APIURL + '/signin';
                     var user = {
-                        "username": "mario@caport.com",
+                        "username": "mario@cmc.com",
                         "password": "miciomicio"
                     };
                     var userBody = JSON.stringify(user);
@@ -354,10 +317,7 @@ describe('SignUpIn API', function () {
 
         it('should not login a Authuser bad User', function (done) {
 
-
-
             var userBody = JSON.stringify({user:userStandard});
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signup';
             request.post({
                 url: url,
@@ -374,7 +334,7 @@ describe('SignUpIn API', function () {
 
                     var url = APIURL + '/signin';
                     var user = {
-                        "username": "mario@caportcom",
+                        "username": "mario@cmc.com",
                         "password": "miciomicio"
                     };
                     var userBody = JSON.stringify(user);
@@ -408,7 +368,6 @@ describe('SignUpIn API', function () {
         it('should not login a User, not SignIn Token', function (done) {
 
             var userBody = JSON.stringify({user:userStandard});
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signup';
             request.post({
                 url: url,
@@ -425,7 +384,7 @@ describe('SignUpIn API', function () {
 
                     var url = APIURL + '/signin';
                     var user = {
-                        "username": "mario@caportcom",
+                        "username": "mario@cmc.com",
                         "password": "miciomicio"
                     };
                     var userBody = JSON.stringify(user);
@@ -437,13 +396,6 @@ describe('SignUpIn API', function () {
                     }, function (error, response,body) {
                         if (error) console.log("######  2 ERRORE should not login a Authuser bad User: " + error +"  ######");
                         else {
-                            // console.log("###################################################################");
-                            // console.log("###################################################################");
-                            // console.log("###################################################################");
-                            // console.log("###################################################################");
-                            // console.log("###################################################################");
-                            // //console.log(req.body);
-                            // console.log("Body:------>" +body);
                             response.statusCode.should.be.equal(401);
                             var results = JSON.parse(response.body);
                             results.should.have.property('error');
@@ -466,7 +418,6 @@ describe('SignUpIn API', function () {
         it('should create a new Authuser', function (done) {
 
             var userBody = JSON.stringify({user:userStandard});
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signup';
             request.post({
                 url: url,
@@ -494,10 +445,7 @@ describe('SignUpIn API', function () {
 
         it('should not login a Authuser bad Password', function (done) {
 
-
-
             var userBody = JSON.stringify({user:userStandard});
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signup';
             request.post({
                 url: url,
@@ -514,7 +462,7 @@ describe('SignUpIn API', function () {
 
                     var url = APIURL + '/signin';
                     var user = {
-                        "username": "mario@caport.com",
+                        "username": "mario@cmc.com",
                         "password": "miciomici"
                     };
                     var userBody = JSON.stringify(user);
@@ -706,13 +654,9 @@ describe('SignUpIn API', function () {
         this.timeout(10000);
 
         it('should not create a new Authuser no valid User type sended', function (done) {
-            //console.log("test 1 start");
             var user = JSON.parse(JSON.stringify(userStandard));
             user.type="non valido";
-
-
             var userBody = JSON.stringify({user:user});
-          //  console.log("BODY " + userBody);
             var url = APIURL + '/signup';
             request.post({
                 url: url,
@@ -809,7 +753,6 @@ describe('SignUpIn API', function () {
         it('should reset a password and get reset Token', function (done) {
 
             var userBody = JSON.stringify({user:userStandard});
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signup';
             request.post({
                 url: url,
@@ -833,7 +776,6 @@ describe('SignUpIn API', function () {
                     },function(error, response, body){
                         if(error) console.log("######   ERRORE: " + error + "  ######");
                         else{
-                            console.log("ERR Reset: " + body);
                             response.statusCode.should.be.equal(200);
                             var results = JSON.parse(response.body);
                             results.should.have.property('reset_token');
@@ -854,7 +796,6 @@ describe('SignUpIn API', function () {
         it('should not reset a password for not auth access_token', function (done) {
 
             var userBody = JSON.stringify({user:userStandard});
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signup';
             request.post({
                 url: url,
@@ -878,7 +819,6 @@ describe('SignUpIn API', function () {
                     },function(error, response, body){
                         if(error) console.log("######   ERRORE: " + error + "  ######");
                         else{
-                            console.log("ERR Reset: " + body);
                             response.statusCode.should.be.equal(401);
                             var results = JSON.parse(response.body);
                             results.should.have.property('error');
@@ -899,7 +839,6 @@ describe('SignUpIn API', function () {
         it('should reset a password, get reset Token and set a new Password', function (done) {
 
             var userBody = JSON.stringify({user:userStandard});
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signup';
             request.post({
                 url: url,
@@ -928,7 +867,7 @@ describe('SignUpIn API', function () {
                             var reset_token=results.reset_token;
 
                             var user = {
-                                "username": "mario@caport.com",
+                                "username": "mario@cmc.com",
                                 "password": "miciomicio"
                             };
                             userBody = JSON.stringify(user);
@@ -940,7 +879,6 @@ describe('SignUpIn API', function () {
                             }, function (error, response,body) {
                                 if (error) console.log("######  ERRORE should  login a Authuser: " + error +"  ######");
                                 else {
-                                    console.log("Access_cred SIgn=" + body);
                                     response.statusCode.should.be.equal(200);
                                     var results = JSON.parse(response.body);
                                     results.should.have.property('access_credentials');
@@ -960,7 +898,6 @@ describe('SignUpIn API', function () {
                                     }, function (error, response,body) {
                                         if (error) console.log("######  ERRORE should  login a Authuser: " + error +"  ######");
                                         else {
-                                            console.log("Access_cred=" + body);
                                             response.statusCode.should.be.equal(201);
                                             var results = JSON.parse(response.body);
                                             results.should.have.property('access_credentials');
@@ -982,7 +919,7 @@ describe('SignUpIn API', function () {
                                                     results.error_message.indexOf("You are not correctly authenticated").should.be.greaterThan(-1);
 
                                                     user = {
-                                                        "username": "mario@caport.com",
+                                                        "username": "mario@cmc.com",
                                                         "password": "maciomacio"
                                                     };
                                                     userBody = JSON.stringify(user);
@@ -1021,7 +958,6 @@ describe('SignUpIn API', function () {
         this.timeout(5000);
         it('should set a new password', function (done) {
             var userBody = JSON.stringify({user:userStandard});
-            //console.log("BODY " + userBody);
             var url = APIURL + '/signup';
             request.post({
                 url: url,
@@ -1036,7 +972,7 @@ describe('SignUpIn API', function () {
                     results.should.have.property('created_resource');
                     clientId=results.created_resource._id; // nedeed to cancel user
                     var user = {
-                        "username": "mario@caport.com",
+                        "username": "mario@cmc.com",
                         "password": "miciomicio"
                     };
                     userBody = JSON.stringify(user);
@@ -1067,7 +1003,6 @@ describe('SignUpIn API', function () {
                             }, function (error, response,body) {
                                 if (error) console.log("######  ERRORE should  login a Authuser: " + error +"  ######");
                                 else {
-                                    console.log("Body SignIN " + body);
                                     response.statusCode.should.be.equal(201);
                                     var results = JSON.parse(response.body);
                                     results.should.have.property('access_credentials');
@@ -1088,7 +1023,7 @@ describe('SignUpIn API', function () {
                                             results.error_message.indexOf("You are not correctly authenticated").should.be.greaterThan(-1);
 
                                             user = {
-                                                "username": "mario@caport.com",
+                                                "username": "mario@cmc.com",
                                                 "password": "maciomacio"
                                             };
                                             userBody = JSON.stringify(user);

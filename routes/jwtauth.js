@@ -1,3 +1,25 @@
+/*
+ ############################################################################
+ ############################### GPL III ####################################
+ ############################################################################
+ *                         Copyright 2017 CRS4                                 *
+ *       This file is part of CRS4 Microservice Core - User (CMC-User).       *
+ *                                                                            *
+ *       CMC-Auth is free software: you can redistribute it and/or modify     *
+ *     it under the terms of the GNU General Public License as published by   *
+ *       the Free Software Foundation, either version 3 of the License, or    *
+ *                    (at your option) any later version.                     *
+ *                                                                            *
+ *       CMC-Auth is distributed in the hope that it will be useful,          *
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ *               GNU General Public License for more details.                 *
+ *                                                                            *
+ *       You should have received a copy of the GNU General Public License    *
+ *       along with CMC-User.  If not, see <http://www.gnu.org/licenses/>.    *
+ * ############################################################################
+ */
+
 var conf = require('../config').conf;
 var request = require('request');
 var _=require("underscore");
@@ -15,39 +37,25 @@ exports.decodeToken = function(req, res, next) {
              }
     }
 
-    var exampleUrl = "http://cp2020.crs4.it/";
+    var exampleUrl = conf.exampleUrl;
 
     if (token) {
-
-        // var URI;
-        // var path=(req.route.path=="/") ? "" : req.route.path;
-        // if(_.isEmpty(req.baseUrl))
-        //     URI=req.path+path;
-        // else
-        //     URI=req.baseUrl+path;
-
 
         var path= (_.isEmpty(req.route)) ?  req.path : req.route.path;
         var URI=(_.isEmpty(req.baseUrl)) ? path : (req.baseUrl+path) ;
         URI=URI.endsWith("/") ? URI : URI+"/";
 
-        var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
-        gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
         var rqparams={
-            url: conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gw + '/tokenactions/checkiftokenisauth',
+            url: conf.authUrl + '/tokenactions/checkiftokenisauth',
             headers : {'Authorization' : "Bearer "+ conf.auth_token, 'content-type': 'application/json'},
             body:JSON.stringify({decode_token:token,URI:URI,method:req.method})
         };
 
-        console.log("richiesta:" + JSON.stringify(rqparams));
 
         var decoded=null;
 
         request.post(rqparams, function(error, response, body){
-
-            console.log("Body In DEcode:"+body);
             if(error) {
-                console.log("ERROR:"+error);
                 return  res.status(500).send({error:'internal_microservice_error', error_message:error+" "});
             }else{
 
@@ -89,11 +97,10 @@ exports.decodeToken = function(req, res, next) {
 //             }
 //     }
 //
-//     var exampleUrl = "http://cp2020.crs4.it/";
+//     var exampleUrl = "http://example.it";
 //
 //     if (token) {
 //
-//         //   console.log(decoded.iss);
 //         if (token!=mytoken.MyMicroserviceToken) {
 //             return res.status(401)
 //                 .set({'WWW-Authenticate': 'Bearer realm=' + exampleUrl + ', error="invalid_token", error_message="The access token is not valid"'})

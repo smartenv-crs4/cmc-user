@@ -1,3 +1,24 @@
+/*
+ ############################################################################
+ ############################### GPL III ####################################
+ ############################################################################
+ *                         Copyright 2017 CRS4                                 *
+ *       This file is part of CRS4 Microservice Core - User (CMC-User).       *
+ *                                                                            *
+ *       CMC-Auth is free software: you can redistribute it and/or modify     *
+ *     it under the terms of the GNU General Public License as published by   *
+ *       the Free Software Foundation, either version 3 of the License, or    *
+ *                    (at your option) any later version.                     *
+ *                                                                            *
+ *       CMC-Auth is distributed in the hope that it will be useful,          *
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ *               GNU General Public License for more details.                 *
+ *                                                                            *
+ *       You should have received a copy of the GNU General Public License    *
+ *       along with CMC-User.  If not, see <http://www.gnu.org/licenses/>.    *
+ * ############################################################################
+ */
 
 var conf=require('../config').conf;
 var util=require('util');
@@ -9,27 +30,20 @@ var server;
 var app = require('../app');
 var Port = 3010;
 var _=require("underscore");
-
-var gwExist=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
-gwExist=_.isEmpty(conf.apiVersion) ? gwExist : gwExist + "/" + conf.apiVersion;
-
-var authHost = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gwExist;
+var authHost = conf.authUrl;
 
 
 exports.setAuthMsMicroservice=function(doneCallback){
 
     var url=authHost;
-
-
     async.series([
-        function(callback){ // ccheck if AuthMs is in dev mode
+        function(callback){ // check if AuthMs is in dev mode
             request.get(url+"/env", function(error, response, body){
 
                 if(error) {
                     throw error;
                 }else{
                     var env=JSON.parse(body).env;
-                    console.log("BDY "+body);
                     if(env=="dev"){
                         db.connect(function (err) {
                             if (err) console.log("######   ERRORE BEFORE : " + err +"  ######");
@@ -58,7 +72,6 @@ exports.setAuthMsMicroservice=function(doneCallback){
                     body:JSON.stringify({usertype:{name:tokenT}})
                 };
                 request.post(rqparams, function(error, response, body){
-                    console.log("!!!!!!!!!!Cration User Type!!!!!!!!!!!" + body);
                     if(error) {
                         throw err;
                         clb("err");
@@ -70,7 +83,6 @@ exports.setAuthMsMicroservice=function(doneCallback){
 
             },function(err){
                 conf.testConfig.usersId=usersId;
-                console.dir(conf.testConfig.usersId);
                 callback(null,"two");
             });
 
@@ -97,7 +109,6 @@ exports.setAuthMsMicroservice=function(doneCallback){
 
             },function(err){
                 conf.testConfig.appsId=appsId;
-                console.dir(conf.testConfig.appsId);
                 callback(null,"three");
             });
         },
@@ -133,9 +144,7 @@ exports.setAuthMsMicroservice=function(doneCallback){
                     headers: {'content-type': 'application/json', 'Authorization': "Bearer " + conf.auth_token},
                     body:JSON.stringify({microservice:{name:"userms",URI:value.URI, authToken:value.token, method:value.method}})
                 };
-                //console.log("ROLE: " + value.method + " ---> " + value.URI);
                 request.post(rqparams, function(error, response, body){
-                    console.log(body);
                     if(error) {
                         throw err;
                         clb("err");
@@ -147,7 +156,6 @@ exports.setAuthMsMicroservice=function(doneCallback){
 
             },function(err){
                 conf.testConfig.AuthRoles=roles;
-                console.dir(conf.testConfig.AuthRoles);
                 callback(null,"four");
             });
 
@@ -182,9 +190,8 @@ exports.resetAuthMsStatus = function(callback) {
                     url: authHost+"/authms/authendpoint/"+ value.id,
                     headers: {'content-type': 'application/json', 'Authorization': "Bearer " + conf.auth_token}
                 };
-                //console.log("ROLE: " + value.method + " ---> " + value.URI);
+
                 request.delete(rqparams, function(error, response, body){
-                    //console.log(body);
                     if(error) {
                         clbeach(error);
                     }else{
@@ -206,14 +213,11 @@ exports.resetAuthMsStatus = function(callback) {
                     url: authHost+"/apptypes/"+ value,
                     headers: {'content-type': 'application/json', 'Authorization': "Bearer " + conf.auth_token}
                 };
-                //console.log("ROLE: " + value.method + " ---> " + value.URI);
-                console.log("####### CLEAN APPS TYPE ########")
+
                 request.delete(rqparams, function(error, response, body){
-                    //console.log(body);
                     if(error) {
                         clbeach(error);
                     }else{
-                        console.log(body);
                         clbeach();
                     }
                 });
@@ -232,13 +236,11 @@ exports.resetAuthMsStatus = function(callback) {
                     url: authHost+"/usertypes/"+ value,
                     headers: {'content-type': 'application/json', 'Authorization': "Bearer " + conf.auth_token}
                 };
-                console.log("####### CLEAN USERS TYPE ########");
+
                 request.delete(rqparams, function(error, response, body){
-                    console.log(body);
                     if(error) {
                         clbeach(error);
                     }else{
-                        //console.log(body);
                         clbeach();
                     }
                 });

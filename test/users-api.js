@@ -1,3 +1,26 @@
+/*
+ ############################################################################
+ ############################### GPL III ####################################
+ ############################################################################
+ *                         Copyright 2017 CRS4                                 *
+ *       This file is part of CRS4 Microservice Core - User (CMC-User).       *
+ *                                                                            *
+ *       CMC-Auth is free software: you can redistribute it and/or modify     *
+ *     it under the terms of the GNU General Public License as published by   *
+ *       the Free Software Foundation, either version 3 of the License, or    *
+ *                    (at your option) any later version.                     *
+ *                                                                            *
+ *       CMC-Auth is distributed in the hope that it will be useful,          *
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ *               GNU General Public License for more details.                 *
+ *                                                                            *
+ *       You should have received a copy of the GNU General Public License    *
+ *       along with CMC-User.  If not, see <http://www.gnu.org/licenses/>.    *
+ * ############################################################################
+ */
+
+
 var should = require('should');
 var mongoose = require('mongoose');
 var _ = require('underscore')._;
@@ -5,92 +28,19 @@ var async = require('async');
 var db = require("../models/db");
 var Users = require('../models/users').User;
 var conf = require('../config').conf;
-
 var request = require('request');
-
 var app = require('../app');
 var util = require('util');
-
-
 var Port = 3010;
 var APIURL = 'http://localhost:' + Port +"/users" ;
-
-
 var adminToken;
-
-
-
 var clientUser;
 var clientId;
-
-
-
-
 var MStoken = conf.auth_token;
 var userStandard = conf.testConfig.userTypeTest;
 var commonFunctioTest=require("./testCommonfunctions");
 
 describe('Users API', function () {
-
-    // before(function (done) {
-    //     //this.timeout(4000);
-    //     //
-    //     //console.log("BEFORE");
-    //     db.connect(function (err) {
-    //         if (err) console.log("######   ERRORE BEFORE : " + err +"  ######");
-    //
-    //         app.set('port', process.env.PORT || Port);
-    //
-    //         server = app.listen(app.get('port'), function () {
-    //             console.log('TEST Express server listening on port ' + server.address().port);
-    //
-    //
-    //             ///
-    //
-    //             var userAdmin = {
-    //                 "username": "admin@admin.com",
-    //                 "password": "admin"
-    //             };
-    //
-    //             var url = APIURL + '/signin';
-    //
-    //             request.post({
-    //                 url: url,
-    //                 body: JSON.stringify(userAdmin),
-    //                 headers: {'content-type': 'application/json', 'Authorization': "Bearer " + token}
-    //             }, function (error, response,body) {
-    //                 if (error) console.log("######  2 ERRORE should  login a Authuser: " + error +"  ######");
-    //                 else {
-    //                     console.log("GET ADMIN TOKEN " + body);
-    //                     response.statusCode.should.be.equal(201);
-    //                     var results = JSON.parse(response.body);
-    //                     results.should.have.property('access_credentials');
-    //                     adminToken=results.access_credentials.apiKey.token;
-    //                     console.log("ADMINTOKEN " + adminToken);
-    //
-    //                 }
-    //                 done();
-    //             });
-    //
-    //
-    //
-    //             ////
-    //         });
-    //     });
-    // });
-    //
-    // after(function (done) {
-    //     //console.log("AFTER");
-    //     Users.remove({}, function (err,elm) {
-    //         if (err) console.log("######   ERRORE After 1: " + err +"  ######");
-    //         db.disconnect(function (err,res) {
-    //             if (err) console.log("######   ERRORE After 2: " + err +"  ######");
-    //             done();
-    //         });
-    //         server.close();
-    //     });
-    // });
-
 
     before(function (done) {
         commonFunctioTest.setAuthMsMicroservice(function(err){
@@ -106,13 +56,10 @@ describe('Users API', function () {
             }, function (error, response,body) {
                 if (error) console.log("######  2 ERRORE should  login a Authuser: " + error +"  ######");
                 else {
-                    console.log("GET ADMIN TOKEN " + body);
                     response.statusCode.should.be.equal(200);
                     var results = JSON.parse(response.body);
                     results.should.have.property('access_credentials');
                     adminToken=results.access_credentials.apiKey.token;
-                    console.log("ADMINTOKEN " + adminToken);
-
                 }
                 done();
             });
@@ -120,7 +67,6 @@ describe('Users API', function () {
     });
 
     after(function (done) {
-        //console.log("AFTER");
         Users.remove({}, function (err,elm) {
             if (err) console.log("######   ERRORE After 1: " + err +"  ######");
             commonFunctioTest.resetAuthMsStatus(function(err){
@@ -136,8 +82,6 @@ describe('Users API', function () {
 
         var range = _.range(100);
 
-        //Add cars
-       // console.log("BEFORE EACH");
         async.each(range, function (e, cb) {
 
             Users.create({
@@ -149,7 +93,6 @@ describe('Users API', function () {
                 notes:"notes"+e
             }, function (err, newuser) {
                 if (err) console.log("######   ERRORE BEFOREEACH: " + err +"  ######");
-                //console.log(e);
                 if(e==1) clientUser=newuser._id;
                 cb();
             });
@@ -161,7 +104,6 @@ describe('Users API', function () {
 
 
     afterEach(function (done) {
-        //console.log("AFTER EACH");
         Users.remove({}, function (err, elm) {
             if (err) console.log("######   ERRORE AfterEach: " + err +"  ######");
             if(clientId)
@@ -178,8 +120,6 @@ describe('Users API', function () {
 
         it('must return ONE user and _metadata, all fields', function (done) {
 
-           // console.log("SEND TEST");
-
             request.get({
                 url: APIURL + '?skip=0&limit=1',
                 headers: {'Authorization': "Bearer " + adminToken}
@@ -187,7 +127,6 @@ describe('Users API', function () {
 
                 if (error) console.log("######   ERRORE: " + error +"  ######");
                 else {
-                    //console.log("ERR MSG:" + body);
                     response.statusCode.should.be.equal(200);
                     var results = JSON.parse(body);
 
@@ -223,7 +162,6 @@ describe('Users API', function () {
 
                 if (error) console.log("######   ERRORE: " + error +"  ######");
                 else {
-                    //console.log("ERR MSG:" + body);
                     response.statusCode.should.be.equal(200);
                     var results = JSON.parse(body);
 
@@ -307,7 +245,6 @@ describe('Users API', function () {
 
                 if (error) console.log("######   ERRORE: " + error +"  ######");
                 else {
-                    //console.log("EREWREWREWRWEREW " +body);
                     response.statusCode.should.be.equal(200);
                     var results = JSON.parse(body);
                     results.should.have.property('_metadata');
@@ -335,7 +272,6 @@ describe('Users API', function () {
                 if (error) console.log("######   ERRORE: " + error +"  ######");
                 else {
                     var results = JSON.parse(body);
-                    //console.log("ERRMSG" + results.error_message)
                     response.statusCode.should.be.equal(400);
                     results.should.have.property('error');
                     results.should.have.property('error_message');
@@ -347,16 +283,13 @@ describe('Users API', function () {
 
 
     function deleteFromAuth(id,done){
-        var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
-        gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
-        var url = conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gw + '/authuser/' + id;
+        var url = conf.authUrl+ '/authuser/' + id;
         clientId=null;
         request.delete({
             url: url,
             headers: {'content-type': 'application/json', 'Authorization': "Bearer " + MStoken}
         },function(error, response, body){
             if(error) {
-                console.log("######   ERRORE: " + error + "  ######");
                 done();
             }
             else{
@@ -368,7 +301,6 @@ describe('Users API', function () {
 
     function createUser(callb){
         var userBody = JSON.stringify({user:userStandard});
-        //console.log("BODY " + userBody);
         var url = APIURL + '/signup';
         request.post({
             url: url,
@@ -377,7 +309,6 @@ describe('Users API', function () {
         }, function (error, response,body) {
             if (error) console.log("######  1 ERRORE should  login a Authuser: " + error +"  ######");
             else {
-                console.log(body);
                 response.statusCode.should.be.equal(201);
                 var results = JSON.parse(response.body);
                 results.should.have.property('access_credentials');
@@ -399,7 +330,6 @@ describe('Users API', function () {
                     request.get({url:url,headers:{'Authorization' : "Bearer "+ token}},function(error, response, body){
                         if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
                         else{
-                            console.log(body);
                             response.statusCode.should.be.equal(200);
                             var results = JSON.parse(response.body);
                             results.should.have.property('email');
@@ -484,7 +414,6 @@ describe('Users API', function () {
                     request.get({url:url,headers:{'Authorization' : "Bearer "+ adminToken}},function(error, response, body){
                         if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
                         else{
-                            console.log("404ERR " + body);
                             response.statusCode.should.be.equal(404);
                         }
                         done();
@@ -508,7 +437,6 @@ describe('Users API', function () {
                     request.get({url:url,headers:{'Authorization' : "Bearer "+ token}},function(error, response, body){
                         if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
                         else{
-                            console.log("404ERR " + body);
                             response.statusCode.should.be.equal(401);
                         }
                         done();
@@ -532,11 +460,9 @@ describe('Users API', function () {
                     var url = APIURL+'/'+clientId;
                     request.delete({url:url,headers:{'Authorization' : "Bearer "+ adminToken}},function(error, response, body){
                         if(error) {
-                            console.log("######   ERRORE: " + error + "  ######");
                             done()
                         }
                         else{
-                            console.log("404ERR " + body);
                             response.statusCode.should.be.equal(204);
                             Users.findOne({id:clientId}, function(err, usr){
 
@@ -562,11 +488,9 @@ describe('Users API', function () {
                     var url = APIURL+'/'+"ABC";
                     request.delete({url:url,headers:{'Authorization' : "Bearer "+ adminToken}},function(error, response, body){
                         if(error) {
-                            console.log("######   ERRORE: " + error + "  ######");
                             done()
                         }
                         else{
-                            console.log("404ERR " + body);
                             response.statusCode.should.be.equal(500);
                             done();
                         }
@@ -595,11 +519,10 @@ describe('Users API', function () {
                         if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
                         else{
                             response.statusCode.should.be.equal(201);
-                            console.log("#####AFTERDISAVBLE##### " + body);
 
                             var url = APIURL + '/signin';
                             var user = {
-                                "username": "mario@caport.com",
+                                "username": "mario@cmc.com",
                                 "password": "miciomicio"
                             };
                             var userBody = JSON.stringify(user);

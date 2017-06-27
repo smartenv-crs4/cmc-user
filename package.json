@@ -1,5 +1,5 @@
 {
-  "name": "Caport2020UserAPI",
+  "name": "CMCUserAPI",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -30,8 +30,8 @@
     "should": "^4.0.4"
   },
   "apidoc": {
-    "name": "Cagliari Port 2020 User API",
-    "title": "Caport2020UserAPI",
+    "name": "CMC(Crs4 Microservice Core) User API",
+    "title": "CMCUserAPI",
     "url": "http://smartapi.crs4.it/api/user/v1",
     "header": {
       "title": "API Overview",

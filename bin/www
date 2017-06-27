@@ -1,5 +1,30 @@
 #!/usr/bin/env node
-var debug = require('debug')('caport2020User-Microservice');
+
+
+/*
+ ############################################################################
+ ############################### GPL III ####################################
+ ############################################################################
+*                         Copyright 2017 CRS4                                 *
+*       This file is part of CRS4 Microservice Core - User (CMC-User).       *
+*                                                                            *
+*       CMC-Auth is free software: you can redistribute it and/or modify     *
+*     it under the terms of the GNU General Public License as published by   *
+*       the Free Software Foundation, either version 3 of the License, or    *
+*                    (at your option) any later version.                     *
+*                                                                            *
+*       CMC-Auth is distributed in the hope that it will be useful,          *
+*      but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+*               GNU General Public License for more details.                 *
+*                                                                            *
+*       You should have received a copy of the GNU General Public License    *
+*       along with CMC-User.  If not, see <http://www.gnu.org/licenses/>.    *
+* ############################################################################
+*/
+
+
+var debug = require('debug')('CMCUser-Microservice');
 var app = require('../app');
 var db = require("../models/db");
 
@@ -26,7 +51,6 @@ process.on('SIGINT', function(code) {
         console.log('Disconnected from database');
     }
 
-
     process.exit(0);
     });
 
@@ -47,7 +71,7 @@ if (process.env.ENABLEHTTPS ){
     var options = {
         key : fs.readFileSync('keys/key.pem'),
         cert : fs.readFileSync('keys/key-cert.pem')
-    }
+    };
     server = https.createServer(options, app).listen(app.get('port'), function() {
         debug('Express server listening on port ' + server.address().port);
         console.log('Express server HTTPS listening on port ' + server.address().port);

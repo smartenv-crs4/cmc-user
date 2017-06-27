@@ -1,3 +1,25 @@
+/*
+ ############################################################################
+ ############################### GPL III ####################################
+ ############################################################################
+ *                         Copyright 2017 CRS4                                 *
+ *       This file is part of CRS4 Microservice Core - User (CMC-User).       *
+ *                                                                            *
+ *       CMC-Auth is free software: you can redistribute it and/or modify     *
+ *     it under the terms of the GNU General Public License as published by   *
+ *       the Free Software Foundation, either version 3 of the License, or    *
+ *                    (at your option) any later version.                     *
+ *                                                                            *
+ *       CMC-Auth is distributed in the hope that it will be useful,          *
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ *               GNU General Public License for more details.                 *
+ *                                                                            *
+ *       You should have received a copy of the GNU General Public License    *
+ *       along with CMC-User.  If not, see <http://www.gnu.org/licenses/>.    *
+ * ############################################################################
+ */
+
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -14,19 +36,6 @@ var User = require('./models/users').User;
 var app = express();
 var plugin=require('apiextender');
 
-// var conf = null;
-//
-// if (app.get('env') === 'dev') {
-//     conf = config.dev;
-// }
-// else{
-//     conf = config.production;
-// }
-//require('./models/db')
-//connect to DB
-///...
-
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -37,7 +46,6 @@ app.set('jwtTokenSecret', 'YOUR_SECRET_STRING');
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 
 // for timestamps in logger
-
 app.use(logger('dev'));
 app.use(bodyParser.json());
 
@@ -46,12 +54,11 @@ app.use(cookieParser());
 // static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/doc', express.static('doc',{root:'doc'}));
-
 //app.use(logger('[:mydate] :method :url :status :res[content-length] - :remote-addr - :response-time ms'));
 plugin.extend(app);
 app.use('/', routes);
-app.use('/users',users); //users and cars
-//app.use('/auth', auth); // authorization routes
+app.use('/users',users); //users
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

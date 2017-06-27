@@ -1,3 +1,26 @@
+/*
+ ############################################################################
+ ############################### GPL III ####################################
+ ############################################################################
+ *                         Copyright 2017 CRS4                                 *
+ *       This file is part of CRS4 Microservice Core - User (CMC-User).       *
+ *                                                                            *
+ *       CMC-Auth is free software: you can redistribute it and/or modify     *
+ *     it under the terms of the GNU General Public License as published by   *
+ *       the Free Software Foundation, either version 3 of the License, or    *
+ *                    (at your option) any later version.                     *
+ *                                                                            *
+ *       CMC-Auth is distributed in the hope that it will be useful,          *
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ *               GNU General Public License for more details.                 *
+ *                                                                            *
+ *       You should have received a copy of the GNU General Public License    *
+ *       along with CMC-User.  If not, see <http://www.gnu.org/licenses/>.    *
+ * ############################################################################
+ */
+
+
 var express = require('express');
 var middlewares = require('./middlewares');
 var User = require('../models/users').User;
@@ -10,9 +33,7 @@ var request = require('request');
 var comminFunctions=require("./commonfunctions");
 var async=require('async');
 
-var gwExists=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
-gwExists=_.isEmpty(conf.apiVersion) ? gwExists : gwExists + "/" + conf.apiVersion;
-var microserviceBaseURL=conf.authProtocol + "://" + conf.authHost + ":" + conf.authPort + gwExists;
+var microserviceBaseURL=conf.authUrl;
 var microserviceTokem=conf.auth_token;
 
 router.use(middlewares.parsePagination);
@@ -164,11 +185,7 @@ router.use(middlewares.parseFields);
  * @apiParam {Number} limit  default limit param used to paginate GET responses
  * @apiParam {Number} skip   default skip param used to paginate GET responses
  * @apiParam {String} logfile log file path
- * @apiParam {String} authProtocol protocol used to call authorization microservice resource
- * @apiParam {String} authHost authorization microservice IP or host name
- * @apiParam {String} authPort port used to call a resource from authorization microservice
- * @apiParam {String} apiGwAuthBaseUrl API gateway base URL. Mandatory only if API calls pass through an API gateway
- * @apiParam {String} apiVersion authorization microservice API version
+ * @apiParam {String} authUrl URL used to call authorization microservice(authms) resource
  * @apiParam {String} auth_token token used to call authorization microservice
  * @apiParam {Object} AdminDefaultUser admin Admin default user dictionary. The admin default user is registered at microservice startup
  * @apiParam {String} AdminDefaultUser.name Admin Name
@@ -224,7 +241,7 @@ router.use(middlewares.parseFields);
  *      {
  *        "created_resource":{
  *                 "name":"Micio",
- *                 "email":"mario@caport.com",
+ *                 "email":"mario@cmc.com",
  *                 "surname":"Macio",
  *                 "id":"57643332ab9293ff0b5da6f0"
  *        },
@@ -245,12 +262,7 @@ router.use(middlewares.parseFields);
  * @apiUse ServerError
  * @apiSampleRequest off
  */
-//router.post('/signup',[middlewares.ensureUserIsAuthAppOrAdmin] ,function(req, res){
 router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
-
-    //console.log("USER SIGNUP " + conf.SignUpAuthorizedAppAndMS);
-    // if(req.user.valid){ //if ot valid retuen in jwtaut midleware
-    //  if(conf.SignUpAuthorizedAppAndMS.indexOf(req.User_App_Token.type)>=0 ){ // se il token è di un app che può fare login
 
 
     if (!req.body || _.isEmpty(req.body))  return res.status(400).send({
@@ -258,19 +270,13 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
         error_message: 'request body missing'
     });
 
-    //console.log("signUp request user body"+JSON.stringify(req.body.user));
+
     var user = req.body.user;
-    //var password = req.body.user.password;
 
     if (!user) return res.status(400).send({error: 'BadRequest', error_message: "No user provided"});
 
     if((conf.adminUser.indexOf(user.type)>=0) && (!(conf.adminUser.indexOf(req.User_App_Token.type)>=0)))//to create admin user use a post
         return res.status(401).send({error: 'NotAuthorized', error_message : "Only Admin User can SignUp admin users"});
-
-    //if (!password) return res.status(400).send({error: 'no password sent', error_message : "No password provided"});
-    //delete user['password'];
-    //registra l'utente sul microservizio autenticazione
-    //console.log("signUp request user body"+JSON.stringify(user));
 
 
     var loginUser={
@@ -287,14 +293,12 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
         body: JSON.stringify({user: loginUser})
     };
 
-    //console.log("signUp request param"+JSON.stringify(rqparams));
     request.post(rqparams, function (error, response, body) {
 
         if (error) {
             return res.status(500).send({error: 'internal_microservice_error', error_message: error + ""});
         } else {
 
-            console.log("signUp response body" + body);
             var loginToken = JSON.parse(body);
 
             if(!loginToken.error){ // ho un token valido
@@ -313,21 +317,19 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
                             request.delete(rqparams, function (error, response, body) {
                                 if (error)
                                     console.log("inconsistent data");
-                                //TODO se in seguito ad una creazione utente non andat a buon fine l'eliminazione dell utente sul microservizio auth non va a buon fine si hanno dati inconsistenti
+                                //TODO Create an inconsistent data queue. If the user creation is not completed and wiping that user in auth does not succeed, the data can be inconsistent
 
                             });
                             return res.status(500).send({error: 'internal_Error', error_message: err});
 
                         } else {
                             var tmpU = JSON.parse(JSON.stringify(newUser));
-                            console.log("new user:" + util.inspect(tmpU));
                             delete tmpU['__v'];
                             //delete tmpU['_id'];
                             return res.status(201).send({"created_resource": tmpU, "access_credentials": loginToken});
                         }
                     });
                 } catch (ex) {
-                    //console.log("ECCCEPTIO "+ ex);
                     rqparams = {
                         url: microserviceBaseURL + '/authuser/' + user._id,
                         headers: {'Authorization': "Bearer " + microserviceTokem}
@@ -335,7 +337,7 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
                     request.delete(rqparams, function (error, response, body) {
                         if (error)
                             console.log("inconsistent data");
-                        //TODO se in seguito ad una creazione utente non andat a buon fine l'eliminazione dell utente sul microservizio auth non va a buon fine si hanno dati inconsistenti
+                        //TODO Create an inconsistent data queue. If the user creation is not completed and wiping that user in auth does not succeed, the data can be inconsistent
 
                     });
                     return res.status(500).send({
@@ -349,13 +351,6 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
             }
         }
     });
-
-    //} else{
-    //   res.status(401).send({error: "invalid_token", error_description: "Unauthorized: The access token is not valid to access the resource. Use access_token of this type:" + conf.SignUpAuthorizedAppAndMS});
-    //}
-    //}else{
-    //    res.status(401).send({error: "invalid_token", error_description:req.user.error_description });
-    //}
 
 });
 
@@ -414,11 +409,7 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
  * @apiUse InvalidUserAndPassword
  * @apiSampleRequest off
  */
-//router.post('/signin',[middlewares.ensureUserIsAuthAppSignIn] ,function(req, res){
 router.post('/signin', [jwtMiddle.decodeToken], function (req, res) {
-
-    // if(req.user.valid){ //if ot valid retuen in jwtaut midleware
-    //  if(conf.SignUpAuthorizedAppAndMS.indexOf(req.User_App_Token.type)>=0 ){ // se il token è di un app che può fare login
 
     if (!req.body || _.isEmpty(req.body))  return res.status(400).send({
         error: "no_body",
@@ -445,7 +436,6 @@ router.post('/signin', [jwtMiddle.decodeToken], function (req, res) {
             return res.status(500).send({error: 'internal_microservice_error', error_message: error + ""});
         } else {
 
-            console.log("signUp response body" + body);
             var loginToken = JSON.parse(body);
 
             if (!loginToken.error) { // ho un token valido
@@ -489,11 +479,8 @@ router.post('/signin', [jwtMiddle.decodeToken], function (req, res) {
  * @apiUse ServerError
  */
 
-//router.get('/', [middlewares.ensureUserIsAdmin], function(req, res) {
-router.get('/', [jwtMiddle.decodeToken], function (req, res) {
 
-    //given an authenticated user (by token)
-    //console.log(req);
+router.get('/', [jwtMiddle.decodeToken], function (req, res) {
 
     var fields = req.dbQueryFields;
     if (!fields)
@@ -566,7 +553,7 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res) {
  *      {
  *        "created_resource":{
  *                 "name":"Micio",
- *                 "email":"mario@caport.com",
+ *                 "email":"mario@cmc.com",
  *                 "surname":"Macio",
  *                 "id":"57643332ab9293ff0b5da6f0"
  *        },
@@ -587,29 +574,22 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res) {
  * @apiUse ServerError
  * @apiSampleRequest off
  */
-//router.post('/',[middlewares.ensureUserIsAdmin], function(req, res) {
-router.post('/', [jwtMiddle.decodeToken], function (req, res) {
-                                                                  //Authorized just admins
 
-    // if(req.user.valid){ //if ot valid retuen in jwtaut midleware
-    //  if(conf.SignUpAuthorizedAppAndMS.indexOf(req.User_App_Token.type)>=0 ){ // se il token è di un app che può fare login
+router.post('/', [jwtMiddle.decodeToken], function (req, res) {
 
     if (!req.body || _.isEmpty(req.body))  return res.status(400).send({
         error: "BadRequest",
         error_message: 'request body missing'
     });
 
-    //console.log("signUp request user body"+JSON.stringify(req.body.user));
+
     var user = req.body.user;
-    //var password = req.body.user.password;
 
     if (!user) return res.status(401).send({error: 'no user sent', error_message: "No username provided"});
-    //if (!password) return res.status(400).send({error: 'no password sent', error_message : "No password provided"});
+
     //delete user['password'];
 
-    //registra l'utente sul microservizio autenticazione
-    //console.log("signUp request user body"+JSON.stringify(user));
-
+    //Create User in Authms microservice
     comminFunctions.createUserAsAdmin(user, function (err, status_code, json) {
 
         return res.status(status_code).send(json);
@@ -657,9 +637,6 @@ router.post('/', [jwtMiddle.decodeToken], function (req, res) {
  */
 /* GET user by id. */
 router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf], function (req, res) {
-    //TODO: must be changed to return only authorized users
-    //given an authenticated user (by token)
-
     var fields = req.dbQueryFields;
     if (!fields)
         fields = '-hash -salt -__v';
@@ -767,7 +744,6 @@ router.put('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
         if (!err) {
             if (results) {
                 var tmpU = JSON.parse(JSON.stringify(results));
-                console.log("new user:" + util.inspect(tmpU));
                 delete tmpU['__v'];
                 //delete tmpU['_id'];
                     res.status(200).send(tmpU);
@@ -792,8 +768,6 @@ function enableDisable(req, res, value) {
         url: value ? microserviceBaseURL + "/authuser/" + id + '/actions/enable' : microserviceBaseURL + "/authuser/" + id + '/actions/disable',
         headers: {'Authorization': "Bearer " + microserviceTokem}
     };
-
-    console.log(util.inspect(rqparams));
 
     request.post(rqparams, function (error, response, body) {
 
@@ -846,8 +820,8 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
 
     async.series([
             function (callback) {
-                if (id.indexOf("@") >= 0) { // è un ndirizzo email
-                    if (id.search(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/igm) >= 0) { // è una mail valida
+                if (id.indexOf("@") >= 0) { // it is an email address
+                    if (id.search(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/igm) >= 0) { // it is a valid email address
                         User.findOne({email: id}, function (err, usr) {
                             if (err) return callback({err_code: 500, error: 'internal_error', error_message: err + ""}, 'one');
 
@@ -861,14 +835,14 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
                             return callback(null, 'one');
                         });
 
-                    } else { // non è na mail valida
+                    } else { // it isn't a valid email address
                         return callback({
                             err_code: 400,
                             error: 'BadRequest',
                             error_message: "Please fill a valid email address"
                         }, 'one');
                     }
-                } else {
+                } else {// it isn't an email address but search by User id
 
                     User.findById(id, function (err, usr) {
                         if (err){
@@ -884,11 +858,8 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
                             error_message: "no User found whith id " + id
                         }, 'one');
 
-
-                        return callback(null, 'one'); // ho passto l'id utente e non lo username
+                        return callback(null, 'one');
                     });
-
-
                 }
             }
         ],
@@ -902,10 +873,7 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
                     headers: {'Authorization': "Bearer " + microserviceTokem}
                 };
 
-                console.log("req" + util.inspect(rqparams));
-
                 request.post(rqparams, function (error, response, body) {
-
                     if (error) {
                         return res.status(500).send({
                             error: 'internal_User_microservice_error',
@@ -917,7 +885,6 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
                 });
             }
         });
-
 });
 
 
@@ -999,8 +966,8 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
 
     async.series([
             function (callback) {
-                if (id.indexOf("@") >= 0) { // è un ndirizzo email
-                    if (id.search(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/igm) >= 0) { // è una mail valida
+                if (id.indexOf("@") >= 0) { // id is an email address
+                    if (id.search(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/igm) >= 0) { // id is a valid email address
                         User.findOne({email: id}, function (err, usr) {
                             if (err) callback({err_code: 500, error: 'internal_error', error_message: err + ""}, 'one');
 
@@ -1014,7 +981,7 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
                             callback(null, 'one');
                         });
 
-                    } else { // non è Una mail valida
+                    } else { // id isn't a valid email address
                         callback({
                             err_code: 400,
                             error: 'BadRequest',
@@ -1022,7 +989,7 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
                         }, 'one');
                     }
                 } else {
-                    callback(null, 'one'); // ho passato l'id utente e non lo username
+                    callback(null, 'one'); // id isn't an email address but a user id
                 }
             },
             function (callback) {
@@ -1086,9 +1053,6 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
                     body: JSON.stringify(tmpbody)
                 };
 
-
-                console.log("req" + util.inspect(rqparams));
-
                 request.post(rqparams, function (error, response, body) {
 
                     if (error) {
@@ -1150,7 +1114,6 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
  * @apiUse ServerError
  * @apiSampleRequest off
  */
-//router.post('/:id/actions/resetpassword', [middlewares.ensureUserAdmin], function(req, res){
 router.post('/:id/actions/changeuserid', [jwtMiddle.decodeToken], function (req, res, next) {
 
     var id = (req.params.id).toString();
@@ -1204,8 +1167,6 @@ router.post('/:id/actions/changeuserid', [jwtMiddle.decodeToken], function (req,
  * @apiUse ServerError
  * @apiSampleRequest off
  */
-
-//router.post('/:id/actions/enable', [middlewares.ensureUserIsAdmin], function(req, res){
 router.post('/:id/actions/enable', [jwtMiddle.decodeToken], function (req, res) {
     enableDisable(req, res, true);
 });
@@ -1243,7 +1204,6 @@ router.post('/:id/actions/enable', [jwtMiddle.decodeToken], function (req, res) 
  * @apiUse ServerError
  * @apiSampleRequest off
  */
-//router.post('/:id/actions/disable', [middlewares.ensureUserIsAdmin], function(req, res){
 router.post('/:id/actions/disable', [jwtMiddle.decodeToken], function (req, res) {
     enableDisable(req, res, false);
 });
@@ -1284,7 +1244,6 @@ router.post('/:id/actions/disable', [jwtMiddle.decodeToken], function (req, res)
  * @apiUse ServerError
  * @apiSampleRequest off
  */
-//router.delete('/:id',[middlewares.ensureUserIsAdmin], function(req, res) {
 router.delete('/:id', [jwtMiddle.decodeToken], function (req, res) {
 
     var id = (req.params.id).toString();
@@ -1294,15 +1253,12 @@ router.delete('/:id', [jwtMiddle.decodeToken], function (req, res) {
         headers: {'Authorization': "Bearer " + microserviceTokem}
     };
 
-    console.log(util.inspect(rqparams));
-
     request.delete(rqparams, function (error, response, body) {
 
         if(error) {
             return  res.status(500).send({error:'internal_User_microservice_error', error_message : error +""});
         }else{
             User.findOneAndRemove({_id:id},  function(err, results){
-                console.log("deleted "+util.inspect(results));
                 if(!err){
                     if (results){
                         return res.status(204).send({deleted_resource:results});
@@ -1322,10 +1278,7 @@ router.delete('/:id', [jwtMiddle.decodeToken], function (req, res) {
             });
         }
     });
-
 });
-
-
 
 /**
  * @api {get} /actions/email/find/:term Search all Users
@@ -1355,7 +1308,6 @@ router.delete('/:id', [jwtMiddle.decodeToken], function (req, res) {
  * @apiUse BadRequest
  * @apiUse ServerError
  */
-//router.get('/:term/actions/email/find',middlewares.ensureUserIsAdmin,function (req, res) {
 router.get('/actions/email/find/:term', [jwtMiddle.decodeToken], function (req, res) {
 
     var term = req.params.term,
@@ -1375,7 +1327,6 @@ router.get('/actions/email/find/:term', [jwtMiddle.decodeToken], function (req, 
 
         return res.json({status: true, data: data});
     });
-
 });
 
 

@@ -1,3 +1,26 @@
+/*
+ ############################################################################
+ ############################### GPL III ####################################
+ ############################################################################
+ *                         Copyright 2017 CRS4                                 *
+ *       This file is part of CRS4 Microservice Core - User (CMC-User).       *
+ *                                                                            *
+ *       CMC-Auth is free software: you can redistribute it and/or modify     *
+ *     it under the terms of the GNU General Public License as published by   *
+ *       the Free Software Foundation, either version 3 of the License, or    *
+ *                    (at your option) any later version.                     *
+ *                                                                            *
+ *       CMC-Auth is distributed in the hope that it will be useful,          *
+ *      but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ *               GNU General Public License for more details.                 *
+ *                                                                            *
+ *       You should have received a copy of the GNU General Public License    *
+ *       along with CMC-User.  If not, see <http://www.gnu.org/licenses/>.    *
+ * ############################################################################
+ */
+
+
 var conf = require('../config').conf;
 var User = require('../models/users').User;
 
@@ -37,7 +60,7 @@ exports.ensureUserIsAdminOrSelf = function(req,res,next){
 
     if (!req.User_App_Token )
         return res.status(401).send({ error: "Forbidden", error_message:'you are not authorized to access the resource (no user in the request)'});
-   // console.log("TYPE:" + req.User_App_Token.type + " " + req.User_App_Token._id + " " + id );
+
     if (!(((conf.adminUser.indexOf(req.User_App_Token.type)>=0)) || (req.User_App_Token._id==id))) // se il token è di un utente non Admin e non è l'utent stesso
         return res.status(401).send({ error: "Forbidden",error_message:'only ' +conf.adminUser+' or self user are authorized to access the resource. your Token Id:' +req.User_App_Token._id + " searchId:"+id});
     else
@@ -46,6 +69,8 @@ exports.ensureUserIsAdminOrSelf = function(req,res,next){
 };
 
 
+//Middleware to parse sort option from request
+//Adds sort to request
 exports.parseOptions = function (req, res, next) {
 
     var sortDescRaw = req.query.sortDesc ? req.query.sortDesc.split(",") : null;
@@ -63,7 +88,6 @@ exports.parseOptions = function (req, res, next) {
 //
 //
 // exports.ensureUserIsAdmin = function(req,res,next){
-//    // console.log(req);
 //
 //     if (! req.User_App_Token )
 //         return res.status(401).send({ error: "Forbidden", error_message:'you are not authorized to access the resource (no user in the request)'});
@@ -75,9 +99,7 @@ exports.parseOptions = function (req, res, next) {
 //
 //
 // exports.ensureUserIsAuthAppOrAdmin = function(req,res,next){
-//     // console.log(req);
 //
-//     console.log("Ensure Is Auth App Or Admin --> " +req.User_App_Token.type);
 //
 //     if (!req.User_App_Token )
 //         return res.status(401).send({error: "Forbidden",error_message:'you are not authorized to access the resource (no API KEY in the request)'});
@@ -90,7 +112,6 @@ exports.parseOptions = function (req, res, next) {
 //
 //
 // exports.ensureUserIsAdminOrSelfOrResetToken = function(req,res,next){
-//     // console.log(req);
 //
 //     var id = req.param('id').toString();
 //
@@ -101,7 +122,6 @@ exports.parseOptions = function (req, res, next) {
 //                 error: "Forbidden",
 //                 error_message: 'you are not authorized to access the resource (no user in the request)'
 //             });
-//         console.log("TYPE:" + req.User_App_Token.type + " " + req.User_App_Token._id + " " + id);
 //         if (!(((conf.adminUser.indexOf(req.User_App_Token.type) >= 0)) || (req.User_App_Token._id == id))) // se il token è di un utente non Admin e non è l'utent stesso
 //             return res.status(401).send({
 //                 error: "Forbidden",
@@ -113,9 +133,7 @@ exports.parseOptions = function (req, res, next) {
 // };
 //
 // exports.ensureUserIsAuthApp = function(req,res,next){
-//     // console.log(req);
 //
-//     console.log("Ensure Is Admin");
 //
 //     if (!req.User_App_Token )  // shoul not be necessary becaus decode tken check if APikey exist
 //         return res.status(401).send({error: "Forbidden",error_message:'you are not authorized to access the resource (no API KEY in the request)'});
@@ -127,9 +145,7 @@ exports.parseOptions = function (req, res, next) {
 //
 //
 // exports.ensureUserIsAuthAppSignIn = function(req,res,next){
-//     // console.log(req);
 //
-//     console.log("Ensure Is AUTH SIGIN Token");
 //
 //     if (!req.User_App_Token )
 //         return res.status(401).send({error: "Forbidden",error_message:'you are not authorized to access the resource (no API KEY in the request)'});

@@ -2,15 +2,11 @@
   "dev":{
     "dbHost":"your_db_host",
     "dbPort":"27017",
-    "dbName":"CP2020USERDEV",
+    "dbName":"CMCUSERDEV",
     "limit":50,
     "skip":0,
-    "logfile":"/var/log/caport2020User-Microservice.log",
-    "authProtocol":"http",
-    "authHost":"your_auth_service_host",
-    "authPort":"3000",
-    "apiGwAuthBaseUrl":"",
-    "apiVersion":"",
+    "logfile":"/var/log/CMC-User-Microservice.log",
+    "authUrl":"your_auth_microservice_base_url",
     "auth_token":"your_auth_service_token",
     "AdminDefaultUser" : {
       "name": "Admin",
@@ -21,27 +17,25 @@
       "usertokens":["UserType1"],
       "adminokens":["admin"],
       "authApptokens":["webui"]
-    }
+    },
+    "exampleUrl":"Your_Project_API_URL"
   },
 
   "production":{
     "dbHost":"your_db_host",
     "dbPort":"27017",
-    "dbName":"CP2020USER",
+    "dbName":"CMCUSER",
     "limit":50,
     "skip":0,
-    "logfile":"/var/log/caport2020User-Microservice.log",
-    "authProtocol":"http",
-    "authHost":"your_auth_service_host",
-    "authPort":"3000",
-    "apiGwAuthBaseUrl":"",
-    "apiVersion":"",
+    "logfile":"/var/log/CMC-User-Microservice.log",
+    "authUrl":"your_auth_microservice_base_url",
     "auth_token":"your_auth_service_token",
     "AdminDefaultUser" : {
       "name": "Admin",
       "email": "admin@admin.com",
       "surname":"Admin"
-    }
+    },
+    "exampleUrl":"Your_Project_API_URL"
 
   }
 }
