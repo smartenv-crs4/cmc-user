@@ -48,7 +48,6 @@ var userSch= conf.UserSchema || {
         },
         avatar: String,
         ckan_apikey: String,
-        // password: String,  // passportLocalMongoose manage hash and salt information
         notes: String
     };
 
