@@ -457,6 +457,7 @@ router.post('/signin', [jwtMiddle.decodeToken], function (req, res) {
  *
  * @apiDescription Protected by admin access token, returns a paginated list of all Users.
  * Set pagination skip and limit and other filters in the URL request, e.g. "get /users?skip=10&limit=50&name=Mario"
+ * If you need a filter by _id you can done it by set field 'usersId'. usersId field can be in ObjectId on a ObjectId array.
  *
  * @apiHeader {String} [Authorization] Unique access_token. If set, the same access_token in body or in query param must be undefined
  * @apiHeaderExample {json} Header-Example:
@@ -480,7 +481,7 @@ router.post('/signin', [jwtMiddle.decodeToken], function (req, res) {
  */
 
 
-router.get('/', [jwtMiddle.decodeToken], function (req, res) {
+router.get('/', [jwtMiddle.decodeToken], function (req, res,next) {
 
     var fields = req.dbQueryFields;
     if (!fields)
@@ -488,22 +489,38 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res) {
 
     var query = {};
 
-    for (var v in req.query)
-        if (User.schema.path(v))
+    var ids=req.query.usersId;
+
+    if(ids) {
+        if (_.isArray(ids)) { //is an array
+            query._id={ "$in": ids };
+        } else {
+            query._id=ids;
+        }
+    }
+
+
+
+
+    for (var v in req.query) {
+        if (User.schema.path(v)) {
             query[v] = req.query[v];
-
-        User.findAll(query, fields, req.dbPagination, function(err, results){
-
-        if(!err){
-
-            if (results)
-                res.status(200).send(results);
-            else
-                res.status(204).send();
         }
-        else {
-            res.status(500).send({error: 'internal_error', error_message: 'something blew up, ERROR:' + err});
-        }
+    }
+
+
+    User.findAll(query, fields, req.dbPagination, function(err, results){
+
+    if(!err){
+
+        if (results)
+            res.status(200).send(results);
+        else
+            res.status(204).send();
+    }
+    else {
+        res.status(500).send({error: 'internal_error', error_message: 'something blew up, ERROR:' + err});
+    }
     });
 });
 
@@ -637,6 +654,7 @@ router.post('/', [jwtMiddle.decodeToken], function (req, res) {
  */
 /* GET user by id. */
 router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf], function (req, res) {
+
     var fields = req.dbQueryFields;
     if (!fields)
         fields = '-hash -salt -__v';

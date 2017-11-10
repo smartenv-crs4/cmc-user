@@ -334,7 +334,7 @@ describe('SignUpIn API', function () {
 
                     var url = APIURL + '/signin';
                     var user = {
-                        "username": "mario@cmc.com",
+                        "username": "mariononesiste@cmc.com",
                         "password": "miciomicio"
                     };
                     var userBody = JSON.stringify(user);
