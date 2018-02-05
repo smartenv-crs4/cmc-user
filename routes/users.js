@@ -295,6 +295,8 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
 
     request.post(rqparams, function (error, response, body) {
 
+        try{
+
         if (error) {
             return res.status(500).send({error: 'internal_microservice_error', error_message: error + ""});
         } else {
@@ -349,6 +351,9 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
             } else {
                 return res.status(response.statusCode).send(loginToken);
             }
+        }
+        }catch (ex){
+            return res.status(500).send(ex);
         }
     });
 
@@ -432,16 +437,20 @@ router.post('/signin', [jwtMiddle.decodeToken], function (req, res) {
 
     request.post(rqparams, function (error, response, body) {
 
-        if (error) {
-            return res.status(500).send({error: 'internal_microservice_error', error_message: error + ""});
-        } else {
+        try {
+            if (error) {
+                return res.status(500).send({error: 'internal_microservice_error', error_message: error + ""});
+            } else {
 
-            var loginToken = JSON.parse(body);
+                var loginToken = JSON.parse(body);
 
-            if (!loginToken.error) { // ho un token valido
-                return res.status(200).send({"access_credentials": loginToken});
+                if (!loginToken.error) { // ho un token valido
+                    return res.status(200).send({"access_credentials": loginToken});
+                }
+                else  return res.status(response.statusCode).send(loginToken);
             }
-            else  return res.status(response.statusCode).send(loginToken);
+        }catch (ex){
+        return res.status(500).send(ex);
         }
     });
 
@@ -511,17 +520,22 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res,next) {
 
     User.findAll(query, fields, req.dbPagination, function(err, results){
 
-    if(!err){
+    try {
+        if (!err) {
 
-        if (results)
-            res.status(200).send(results);
-        else
-            res.status(204).send();
-    }
-    else {
-        res.status(500).send({error: 'internal_error', error_message: 'something blew up, ERROR:' + err});
+            if (results)
+                res.status(200).send(results);
+            else
+                res.status(204).send();
+        }
+        else {
+            res.status(500).send({error: 'internal_error', error_message: 'something blew up, ERROR:' + err});
+        }
+    }catch (ex){
+        return res.status(500).send(ex);
     }
     });
+
 });
 
 
@@ -662,15 +676,19 @@ router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
     var id = (req.params.id).toString();
 
     User.findById(id, fields, function(err, results){
-        if(!err){
+        try {
+            if (!err) {
                 res.send(results);
-        }
-        else {
-            if (results === {} || results === undefined)   res.status(404).send({
-                error: 'notFound',
-                error_message: 'user not found'
-            });
-            else res.status(500).send({error: 'internal_error', error_message: 'something blew up, ERROR:' + err});
+            }
+            else {
+                if (results === {} || results === undefined) res.status(404).send({
+                    error: 'notFound',
+                    error_message: 'user not found'
+                });
+                else res.status(500).send({error: 'internal_error', error_message: 'something blew up, ERROR:' + err});
+            }
+        }catch (ex){
+            return res.status(500).send(ex);
         }
     });
 
@@ -759,19 +777,23 @@ router.put('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
 
     User.findOneAndUpdate({_id:id}, newVals, {new: true}, function (err, results) {
 
-        if (!err) {
-            if (results) {
-                var tmpU = JSON.parse(JSON.stringify(results));
-                delete tmpU['__v'];
-                //delete tmpU['_id'];
+        try {
+            if (!err) {
+                if (results) {
+                    var tmpU = JSON.parse(JSON.stringify(results));
+                    delete tmpU['__v'];
+                    //delete tmpU['_id'];
                     res.status(200).send(tmpU);
+                }
+                else {
+                    res.status(404).send({error: "user not found", error_message: 'no user found with specified id'});
+                }
             }
             else {
-                res.status(404).send({error: "user not found", error_message: 'no user found with specified id'});
+                res.status(500).send({error: "internal error", error_message: 'something blew up, ERROR:' + err});
             }
-        }
-        else {
-            res.status(500).send({error: "internal error", error_message: 'something blew up, ERROR:' + err});
+        }catch (ex){
+            return res.status(500).send(ex);
         }
     });
 
@@ -788,11 +810,14 @@ function enableDisable(req, res, value) {
     };
 
     request.post(rqparams, function (error, response, body) {
-
-        if (error) {
-            return res.status(500).send({error: 'internal_User_microservice_error', error_message: error + ""});
-        } else {
-            return res.status(201).send(body);
+        try {
+            if (error) {
+                return res.status(500).send({error: 'internal_User_microservice_error', error_message: error + ""});
+            } else {
+                return res.status(201).send(body);
+            }
+        }catch (ex){
+            return res.status(500).send(ex);
         }
     });
 
@@ -838,69 +863,92 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
 
     async.series([
             function (callback) {
-                if (id.indexOf("@") >= 0) { // it is an email address
-                    if (id.search(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/igm) >= 0) { // it is a valid email address
-                        User.findOne({email: id}, function (err, usr) {
-                            if (err) return callback({err_code: 500, error: 'internal_error', error_message: err + ""}, 'one');
+                try {
+                    if (id.indexOf("@") >= 0) { // it is an email address
+                        if (id.search(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/igm) >= 0) { // it is a valid email address
+                            User.findOne({email: id}, function (err, usr) {
+                                if (err) return callback({
+                                    err_code: 500,
+                                    error: 'internal_error',
+                                    error_message: err + ""
+                                }, 'one');
 
-                             if (_.isEmpty(usr)) return callback({
+                                if (_.isEmpty(usr)) return callback({
+                                    err_code: 404,
+                                    error: 'NotFound',
+                                    error_message: "no User found whith " + id + " email"
+                                }, 'one');
+
+                                id = usr._id;
+                                return callback(null, 'one');
+                            });
+
+                        } else { // it isn't a valid email address
+                            return callback({
+                                err_code: 400,
+                                error: 'BadRequest',
+                                error_message: "Please fill a valid email address"
+                            }, 'one');
+                        }
+                    } else {// it isn't an email address but search by User id
+
+                        User.findById(id, function (err, usr) {
+                            if (err) {
+                                if (err.name == 'CastError')
+                                    return callback({
+                                        err_code: 400,
+                                        error: 'BdRequest',
+                                        error_message: "Invalid user id or username (email)"
+                                    }, 'one');
+                                else
+                                    return callback({
+                                        err_code: 500,
+                                        error: 'internal_error',
+                                        error_message: err + ""
+                                    }, 'one');
+                            }
+
+                            if (_.isEmpty(usr)) return callback({
                                 err_code: 404,
                                 error: 'NotFound',
-                                error_message: "no User found whith " + id + " email"
+                                error_message: "no User found whith id " + id
                             }, 'one');
 
-                            id = usr._id;
                             return callback(null, 'one');
                         });
-
-                    } else { // it isn't a valid email address
-                        return callback({
-                            err_code: 400,
-                            error: 'BadRequest',
-                            error_message: "Please fill a valid email address"
-                        }, 'one');
                     }
-                } else {// it isn't an email address but search by User id
-
-                    User.findById(id, function (err, usr) {
-                        if (err){
-                            if(err.name== 'CastError')
-                                return callback({err_code: 400, error: 'BdRequest', error_message: "Invalid user id or username (email)"}, 'one');
-                            else
-                                return callback({err_code: 500, error: 'internal_error', error_message: err + ""}, 'one');
-                        }
-
-                        if (_.isEmpty(usr)) return callback({
-                            err_code: 404,
-                            error: 'NotFound',
-                            error_message: "no User found whith id " + id
-                        }, 'one');
-
-                        return callback(null, 'one');
-                    });
+                }catch (ex){
+                    return callback({
+                        err_code: 500,
+                        error: 'Internal Server Error',
+                        error_message: ex
+                    }, 'one');
                 }
             }
         ],
         function (err, results) {
+            try {
+                if (err) {
+                    return res.status(err.err_code).send({error: err.error, error_message: err.error_message + ""});
+                } else {
+                    var rqparams = {
+                        url: microserviceBaseURL + "/authuser/" + id + '/actions/resetpassword',
+                        headers: {'Authorization': "Bearer " + microserviceTokem}
+                    };
 
-            if (err) {
-                return res.status(err.err_code).send({error: err.error, error_message: err.error_message + ""});
-            } else {
-                var rqparams = {
-                    url: microserviceBaseURL + "/authuser/" + id + '/actions/resetpassword',
-                    headers: {'Authorization': "Bearer " + microserviceTokem}
-                };
-
-                request.post(rqparams, function (error, response, body) {
-                    if (error) {
-                        return res.status(500).send({
-                            error: 'internal_User_microservice_error',
-                            error_message: error + ""
-                        });
-                    } else {
-                        return res.status(200).send(body);
-                    }
-                });
+                    request.post(rqparams, function (error, response, body) {
+                        if (error) {
+                            return res.status(500).send({
+                                error: 'internal_User_microservice_error',
+                                error_message: error + ""
+                            });
+                        } else {
+                            return res.status(200).send(body);
+                        }
+                    });
+                }
+            }catch (ex){
+                return res.status(500).send(ex);
             }
         });
 });
@@ -984,109 +1032,131 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
 
     async.series([
             function (callback) {
-                if (id.indexOf("@") >= 0) { // id is an email address
-                    if (id.search(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/igm) >= 0) { // id is a valid email address
-                        User.findOne({email: id}, function (err, usr) {
-                            if (err) callback({err_code: 500, error: 'internal_error', error_message: err + ""}, 'one');
+                try {
+                    if (id.indexOf("@") >= 0) { // id is an email address
+                        if (id.search(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/igm) >= 0) { // id is a valid email address
+                            User.findOne({email: id}, function (err, usr) {
+                                if (err) callback({
+                                    err_code: 500,
+                                    error: 'internal_error',
+                                    error_message: err + ""
+                                }, 'one');
 
-                            if (!usr)callback({
-                                err_code: 404,
-                                error: 'NotFound',
-                                error_message: "no User found whith " + id + " email"
+                                if (!usr) callback({
+                                    err_code: 404,
+                                    error: 'NotFound',
+                                    error_message: "no User found whith " + id + " email"
+                                }, 'one');
+
+                                id = usr._id;
+                                callback(null, 'one');
+                            });
+
+                        } else { // id isn't a valid email address
+                            callback({
+                                err_code: 400,
+                                error: 'BadRequest',
+                                error_message: "Please fill a valid email address"
                             }, 'one');
-
-                            id = usr._id;
-                            callback(null, 'one');
-                        });
-
-                    } else { // id isn't a valid email address
-                        callback({
-                            err_code: 400,
-                            error: 'BadRequest',
-                            error_message: "Please fill a valid email address"
-                        }, 'one');
+                        }
+                    } else {
+                        callback(null, 'one'); // id isn't an email address but a user id
                     }
-                } else {
-                    callback(null, 'one'); // id isn't an email address but a user id
+                }catch (ex){
+                    return callback({
+                        err_code: 500,
+                        error: 'Internal Server Error',
+                        error_message: ex
+                    }, 'one');
                 }
             },
             function (callback) {
-
-                if (oldpassword) {
-                    if (id == req.User_App_Token._id) {
-                        tmpbody = {
-                            oldpassword: oldpassword,
-                            newpassword: newpassword
-                        };
-                        callback(null, 'two');
-                    } else {
-                        callback({
-                            err_code: 401,
-                            error: "Forbidden",
-                            error_message: 'you are not authorized to access this resource'
-                        });
-
-                    }
-                } else {
-
-                    var rqparams = {
-                        url: microserviceBaseURL + "/tokenactions/gettokentypelist",
-                        headers: {'Authorization': "Bearer " + microserviceTokem}
-                    };
-
-                    request.get(rqparams, function (error, response, body) {
-
-                        if (error) {
-                            callback({error: 'internal_User_microservice_error', error_message: error + ""}, "two");
-
+                try {
+                    if (oldpassword) {
+                        if (id == req.User_App_Token._id) {
+                            tmpbody = {
+                                oldpassword: oldpassword,
+                                newpassword: newpassword
+                            };
+                            callback(null, 'two');
                         } else {
-                            var appT = JSON.parse(body).user;
-                            // if is admin user or ms
-                            if (_.without(appT, conf.adminUser).indexOf(req.User_App_Token.type) >= 0) {
-                                callback({
-                                    err_code: 401,
-                                    error: "Forbidden",
-                                    error_message: 'you are not authorized to access this resource'
-                                }, "two");
-                            } else {
-                                tmpbody = {
-                                    reset_token: reset_token,
-                                    newpassword: newpassword
-                                };
-                                callback(null, 'two');
-                            }
+                            callback({
+                                err_code: 401,
+                                error: "Forbidden",
+                                error_message: 'you are not authorized to access this resource'
+                            });
+
                         }
-                    });
+                    } else {
+
+                        var rqparams = {
+                            url: microserviceBaseURL + "/tokenactions/gettokentypelist",
+                            headers: {'Authorization': "Bearer " + microserviceTokem}
+                        };
+
+                        request.get(rqparams, function (error, response, body) {
+
+                            if (error) {
+                                callback({error: 'internal_User_microservice_error', error_message: error + ""}, "two");
+
+                            } else {
+                                var appT = JSON.parse(body).user;
+                                // if is admin user or ms (user itself can not reset password with reset_token but only by oldpassword. to eset password user itself do it by app or Admin token)
+                                if (_.without(appT, conf.adminUser).indexOf(req.User_App_Token.type) >= 0) {
+                                    callback({
+                                        err_code: 401,
+                                        error: "Forbidden",
+                                        error_message: 'you are not authorized to access this resource'
+                                    }, "two");
+                                } else {
+                                    tmpbody = {
+                                        reset_token: reset_token,
+                                        newpassword: newpassword
+                                    };
+                                    callback(null, 'two');
+                                }
+                            }
+                        });
+                    }
+                }catch (ex){
+                    return callback({
+                        err_code: 500,
+                        error: 'Internal Server Error',
+                        error_message: ex
+                    }, 'two');
                 }
             }
         ],
         function (err, results) {
+            try {
+                if (err) {
+                    return res.status(err.err_code).send({error: err.error, error_message: err.error_message + ""});
+                } else {
+                    var rqparams = {
+                        url: microserviceBaseURL + "/authuser/" + id + '/actions/setpassword',
+                        headers: {'Authorization': "Bearer " + microserviceTokem, 'content-type': 'application/json'},
+                        body: JSON.stringify(tmpbody)
+                    };
 
-            if (err) {
-                return res.status(err.err_code).send({error: err.error, error_message: err.error_message + ""});
-            } else {
-                var rqparams = {
-                    url: microserviceBaseURL + "/authuser/" + id + '/actions/setpassword',
-                    headers: {'Authorization': "Bearer " + microserviceTokem, 'content-type': 'application/json'},
-                    body: JSON.stringify(tmpbody)
-                };
+                    request.post(rqparams, function (error, response, body) {
 
-                request.post(rqparams, function (error, response, body) {
-
-                    if (error) {
-                        return res.status(500).send({
-                            error: 'internal_User_microservice_error',
-                            error_message: error + ""
-                        });
-                    } else {
-                        var parsedBody=JSON.parse(body);
-                        if(parsedBody.error){
-                            return res.status(response.statusCode).send(parsedBody);
-                        }else {
-                            return res.status(201).send({"access_credentials": JSON.parse(body)});
+                        if (error) {
+                            return res.status(500).send({
+                                error: 'internal_User_microservice_error',
+                                error_message: error + ""
+                            });
+                        } else {
+                            var parsedBody = JSON.parse(body);
+                            if (parsedBody.error) {
+                                return res.status(response.statusCode).send(parsedBody);
+                            } else {
+                                return res.status(201).send({"access_credentials": JSON.parse(body)});
+                            }
                         }
-                    }
-                });
+                    });
+                }
+            }catch (ex){
+                return res.status(500).send(ex);
             }
         });
 
@@ -1272,28 +1342,31 @@ router.delete('/:id', [jwtMiddle.decodeToken], function (req, res) {
     };
 
     request.delete(rqparams, function (error, response, body) {
-
-        if(error) {
-            return  res.status(500).send({error:'internal_User_microservice_error', error_message : error +""});
-        }else{
-            User.findOneAndRemove({_id:id},  function(err, results){
-                if(!err){
-                    if (results){
-                        return res.status(204).send({deleted_resource:results});
+        try {
+            if (error) {
+                return res.status(500).send({error: 'internal_User_microservice_error', error_message: error + ""});
+            } else {
+                User.findOneAndRemove({_id: id}, function (err, results) {
+                    if (!err) {
+                        if (results) {
+                            return res.status(204).send({deleted_resource: results});
+                        }
+                        else
+                            return res.status(404).send({
+                                error: "NotFound",
+                                error_message: 'no user found with specified id'
+                            });
                     }
-                    else
-                        return res.status(404).send({
-                            error: "NotFound",
-                            error_message: 'no user found with specified id'
+                    else {
+                        return res.status(500).send({
+                            error: "internal_error",
+                            error_message: 'something blew up, ERROR:' + err
                         });
-                }
-                else {
-                    return res.status(500).send({
-                        error: "internal_error",
-                        error_message: 'something blew up, ERROR:' + err
-                    });
-                }
-            });
+                    }
+                });
+            }
+        }catch (ex){
+            return res.status(500).send(ex);
         }
     });
 });
@@ -1341,9 +1414,13 @@ router.get('/actions/email/find/:term', [jwtMiddle.decodeToken], function (req, 
         limit: size,
         sort: sortParams
     }, function (err, data) {
-        if (err) return res.json({'status': false, 'err': err});
+        try {
+            if (err) return res.json({'status': false, 'err': err});
 
-        return res.json({status: true, data: data});
+            return res.json({status: true, data: data});
+        }catch (ex){
+            return res.status(500).send(ex);
+        }
     });
 });
 

@@ -32,6 +32,7 @@ var jwtMiddle = require('./jwtauth');
 
 
 
+
 /* GET home page. */
 router.get('/', function(req, res) {
   res.render('index', { title: 'Crs4 Microservice Core(CMC) dev User API' });

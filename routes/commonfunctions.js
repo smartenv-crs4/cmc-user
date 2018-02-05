@@ -30,84 +30,96 @@ var request=require('request');
 
 exports.createUserAsAdmin = function(user,callb) {
 
+    try {
 
-    var loginUser={
-        "email":user.email,
-        "password":user.password,
-        "type":user.type
-    };
+        var loginUser = {
+            "email": user.email,
+            "password": user.password,
+            "type": user.type
+        };
 
-    var rqparams={
-        url: conf.authUrl + '/authuser/signup',
-        headers : {'Authorization' : "Bearer "+ conf.auth_token, 'content-type': 'application/json'},
-        body:JSON.stringify({user:loginUser})
-    };
+        var rqparams = {
+            url: conf.authUrl + '/authuser/signup',
+            headers: {'Authorization': "Bearer " + conf.auth_token, 'content-type': 'application/json'},
+            body: JSON.stringify({user: loginUser})
+        };
 
-    request.post(rqparams, function(error, response, body){
+        request.post(rqparams, function (error, response, body) {
 
-        if(error) {
-            return callb("ERROR",500,{error:"internal_microservice_error",error_message : error +""});
-        }else{
-
-
-            var loginToken = JSON.parse(body);
-
-            if(!loginToken.error){ //  valid token
-                user._id=loginToken.userId;
-                delete user['password'];
-                delete user['type'];
-                delete loginToken['userId'];
-
-                User.create(user,function(err,newUser){
-                    if(err){
-                        var gw=_.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
-                        gw=_.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
-                        rqparams={
-                            url: conf.authUrl + '/authuser/' + user._id,
-                            headers : {'Authorization' : "Bearer "+ conf.auth_token}
-                        };
-
-                        request.delete(rqparams, function(error, response, body) {
-                            if (error)
-                                console.log("inconsistent data");
-                            //TODO Create an inconsistent data queue. If the user creation is not completed and wiping that user in auth does not succeed, the data can be inconsistent
+            if (error) {
+                return callb("ERROR", 500, {error: "internal_microservice_error", error_message: error + ""});
+            } else {
 
 
-                        });
-                        return callb("ERROR",500,{error:"internal_microservice_error",error_message : err +""});
+                var loginToken = JSON.parse(body);
 
-                    }else{
-                        var tmpU=JSON.parse(JSON.stringify(newUser));
-                        delete tmpU['__v'];
-                        //delete tmpU['_id'];
-                        return callb(null,201,{"created_resource":tmpU, "access_credentials":loginToken});
-                    }
-                });
-            } else{
-                return callb("NOTAUTH",401,loginToken);
+                if (!loginToken.error) { //  valid token
+                    user._id = loginToken.userId;
+                    delete user['password'];
+                    delete user['type'];
+                    delete loginToken['userId'];
+
+                    User.create(user, function (err, newUser) {
+                        if (err) {
+                            var gw = _.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
+                            gw = _.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
+                            rqparams = {
+                                url: conf.authUrl + '/authuser/' + user._id,
+                                headers: {'Authorization': "Bearer " + conf.auth_token}
+                            };
+
+                            request.delete(rqparams, function (error, response, body) {
+                                if (error)
+                                    console.log("inconsistent data");
+                                //TODO Create an inconsistent data queue. If the user creation is not completed and wiping that user in auth does not succeed, the data can be inconsistent
+
+
+                            });
+                            return callb("ERROR", 500, {error: "internal_microservice_error", error_message: err + ""});
+
+                        } else {
+                            var tmpU = JSON.parse(JSON.stringify(newUser));
+                            delete tmpU['__v'];
+                            //delete tmpU['_id'];
+                            return callb(null, 201, {"created_resource": tmpU, "access_credentials": loginToken});
+                        }
+                    });
+                } else {
+                    return callb("NOTAUTH", 401, loginToken);
+                }
             }
-        }
-    });
+        });
+    }catch (ex){
+        return  callb("ERROR",500,{error:"InternalError",error_message:ex});
+    }
 };
 
 
 
 exports.setConfig= function(callback){
-    var rqparams={
-        url: conf.authUrl + "/tokenactions/getsupeusertokenlist",
-        headers : {'Authorization' : "Bearer "+ conf.auth_token}
-    };
+    try {
+        var rqparams = {
+            url: conf.authUrl + "/tokenactions/getsupeusertokenlist",
+            headers: {'Authorization': "Bearer " + conf.auth_token}
+        };
 
-    request.get(rqparams, function(error, response, body){
-        if(error) {
-            callback({error:'internal_User_microservice_error', error_message : error +""},null);
+        request.get(rqparams, function (error, response, body) {
+            try {
+                if (error) {
+                    callback({error: 'internal_User_microservice_error', error_message: error + ""}, null);
 
-        }else{
-            var appT=JSON.parse(body).superuser;
-            conf.adminUser=appT;
-            callback(null,appT);
-        }
-    });
+                } else {
+                    var appT = JSON.parse(body).superuser;
+                    conf.adminUser = appT;
+                    callback(null, appT);
+                }
+            } catch (ex) {
+                callback({error: "InternalError", error_message: ex}, null)
+            }
+        });
+    }catch (ex){
+        callback({error: "InternalError", error_message: ex}, null);
+    }
 };
 
 //exports.getMyToken = function() {
