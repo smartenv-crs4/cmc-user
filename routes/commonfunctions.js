@@ -46,47 +46,55 @@ exports.createUserAsAdmin = function(user,callb) {
 
         request.post(rqparams, function (error, response, body) {
 
-            if (error) {
-                return callb("ERROR", 500, {error: "internal_microservice_error", error_message: error + ""});
-            } else {
+            try {
 
-
-                var loginToken = JSON.parse(body);
-
-                if (!loginToken.error) { //  valid token
-                    user._id = loginToken.userId;
-                    delete user['password'];
-                    delete user['type'];
-                    delete loginToken['userId'];
-
-                    User.create(user, function (err, newUser) {
-                        if (err) {
-                            var gw = _.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
-                            gw = _.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
-                            rqparams = {
-                                url: conf.authUrl + '/authuser/' + user._id,
-                                headers: {'Authorization': "Bearer " + conf.auth_token}
-                            };
-
-                            request.delete(rqparams, function (error, response, body) {
-                                if (error)
-                                    console.log("inconsistent data");
-                                //TODO Create an inconsistent data queue. If the user creation is not completed and wiping that user in auth does not succeed, the data can be inconsistent
-
-
-                            });
-                            return callb("ERROR", 500, {error: "internal_microservice_error", error_message: err + ""});
-
-                        } else {
-                            var tmpU = JSON.parse(JSON.stringify(newUser));
-                            delete tmpU['__v'];
-                            //delete tmpU['_id'];
-                            return callb(null, 201, {"created_resource": tmpU, "access_credentials": loginToken});
-                        }
-                    });
+                if (error) {
+                    return callb("ERROR", 500, {error: "internal_microservice_error", error_message: error + ""});
                 } else {
-                    return callb("NOTAUTH", 401, loginToken);
+
+
+                    var loginToken = JSON.parse(body);
+
+                    if (!loginToken.error) { //  valid token
+                        user._id = loginToken.userId;
+                        delete user['password'];
+                        delete user['type'];
+                        delete loginToken['userId'];
+
+                        User.create(user, function (err, newUser) {
+                            if (err) {
+                                var gw = _.isEmpty(conf.apiGwAuthBaseUrl) ? "" : conf.apiGwAuthBaseUrl;
+                                gw = _.isEmpty(conf.apiVersion) ? gw : gw + "/" + conf.apiVersion;
+                                rqparams = {
+                                    url: conf.authUrl + '/authuser/' + user._id,
+                                    headers: {'Authorization': "Bearer " + conf.auth_token}
+                                };
+
+                                request.delete(rqparams, function (error, response, body) {
+                                    if (error)
+                                        console.log("inconsistent data");
+                                    //TODO Create an inconsistent data queue. If the user creation is not completed and wiping that user in auth does not succeed, the data can be inconsistent
+
+
+                                });
+                                return callb("ERROR", 500, {
+                                    error: "internal_microservice_error",
+                                    error_message: err + ""
+                                });
+
+                            } else {
+                                var tmpU = JSON.parse(JSON.stringify(newUser));
+                                delete tmpU['__v'];
+                                //delete tmpU['_id'];
+                                return callb(null, 201, {"created_resource": tmpU, "access_credentials": loginToken});
+                            }
+                        });
+                    } else {
+                        return callb("NOTAUTH", 401, loginToken);
+                    }
                 }
+            }catch (ex){
+                return  callb("ERROR",500,{error:"InternalError",error_message:ex});
             }
         });
     }catch (ex){

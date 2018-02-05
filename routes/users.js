@@ -1096,25 +1096,35 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
 
                         request.get(rqparams, function (error, response, body) {
 
-                            if (error) {
-                                callback({error: 'internal_User_microservice_error', error_message: error + ""}, "two");
-
-                            } else {
-                                var appT = JSON.parse(body).user;
-                                // if is admin user or ms (user itself can not reset password with reset_token but only by oldpassword. to eset password user itself do it by app or Admin token)
-                                if (_.without(appT, conf.adminUser).indexOf(req.User_App_Token.type) >= 0) {
+                            try {
+                                if (error) {
                                     callback({
-                                        err_code: 401,
-                                        error: "Forbidden",
-                                        error_message: 'you are not authorized to access this resource'
+                                        error: 'internal_User_microservice_error',
+                                        error_message: error + ""
                                     }, "two");
+
                                 } else {
-                                    tmpbody = {
-                                        reset_token: reset_token,
-                                        newpassword: newpassword
-                                    };
-                                    callback(null, 'two');
+                                    var appT = JSON.parse(body).user;
+                                    // if is admin user or ms (user itself can not reset password with reset_token but only by oldpassword. to eset password user itself do it by app or Admin token)
+                                    if (_.without(appT, conf.adminUser).indexOf(req.User_App_Token.type) >= 0) {
+                                        callback({
+                                            err_code: 401,
+                                            error: "Forbidden",
+                                            error_message: 'you are not authorized to access this resource'
+                                        }, "two");
+                                    } else {
+                                        tmpbody = {
+                                            reset_token: reset_token,
+                                            newpassword: newpassword
+                                        };
+                                        callback(null, 'two');
+                                    }
                                 }
+                            }catch (ex){
+                                callback({
+                                    error: 'InternalError',
+                                    error_message:ex
+                                }, "two");
                             }
                         });
                     }
@@ -1140,18 +1150,22 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
 
                     request.post(rqparams, function (error, response, body) {
 
-                        if (error) {
-                            return res.status(500).send({
-                                error: 'internal_User_microservice_error',
-                                error_message: error + ""
-                            });
-                        } else {
-                            var parsedBody = JSON.parse(body);
-                            if (parsedBody.error) {
-                                return res.status(response.statusCode).send(parsedBody);
+                        try {
+                            if (error) {
+                                return res.status(500).send({
+                                    error: 'internal_User_microservice_error',
+                                    error_message: error + ""
+                                });
                             } else {
-                                return res.status(201).send({"access_credentials": JSON.parse(body)});
+                                var parsedBody = JSON.parse(body);
+                                if (parsedBody.error) {
+                                    return res.status(response.statusCode).send(parsedBody);
+                                } else {
+                                    return res.status(201).send({"access_credentials": JSON.parse(body)});
+                                }
                             }
+                        }catch (ex){
+                            return res.status(500).send(ex);
                         }
                     });
                 }
