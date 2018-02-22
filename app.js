@@ -35,6 +35,7 @@ var User = require('./models/users').User;
 var app = express();
 var plugin=require('apiextender');
 
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -43,6 +44,7 @@ app.set('jwtTokenSecret', 'YOUR_SECRET_STRING');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
+
 
 // for timestamps in logger
 app.use(logger('dev'));

@@ -209,7 +209,7 @@ describe('Users API', function () {
 
     describe('GET /authuser', function () {
 
-        it('must return  error 401 for not Autthorized token', function (done) {
+        it('must return  error 401 for not Authorized token', function (done) {
 
             request.get({
                 url: APIURL + '?skip=0&limit=2',
@@ -318,6 +318,212 @@ describe('Users API', function () {
             callb(results.access_credentials.apiKey.token || null);
         });
     }
+
+
+
+
+    describe('POST /actions/search', function(){
+
+        it('must search and return all users ', function(done){
+            var bodyParam=JSON.stringify({searchterm:{}});
+            var requestParams={
+                url:APIURL+'/actions/search',
+                headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},
+                body:bodyParam
+            };
+            request.post(requestParams,function(error, response, body){
+                if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
+                else{
+                    response.statusCode.should.be.equal(200);
+                    var results = JSON.parse(response.body);
+                    results.should.have.property('_metadata');
+                    results.should.have.property('users');
+                    results._metadata.totalCount.should.be.equal(100);
+                    //results.users[0].type.should.be.equal(userStandard.type);
+                }
+                done();
+            });
+
+        });
+    });
+
+
+
+    describe('POST /actions/search', function(){
+
+        it('must return one user of a type set in query ', function(done){
+            createUser(function(token){
+                if(token){
+                    console.log(token);
+                    var url = APIURL+'/actions/search'; //?type='+userStandard.type;
+                    var requestParams={
+                        url:url,
+                        headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},
+                        body:JSON.stringify({searchterm:{email:userStandard.email,type:userStandard.type}})
+                    };
+                    request.post(requestParams,function(error, response, body){
+                        if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
+                        else{
+                            //console.log(body);
+                            response.statusCode.should.be.equal(200);
+                            var results = JSON.parse(response.body);
+                            results.should.have.property('_metadata');
+                            results.should.have.property('users');
+                            results._metadata.totalCount.should.be.equal(1);
+                            results.users[0].type.should.be.equal(userStandard.type);
+                        }
+                        done();
+                    });
+                }else{
+                    token.should.be.not(null);
+                }
+            })
+
+        });
+    });
+
+
+    describe('POST /actions/search', function(){
+
+        it('must return one user of all type as set in query ', function(done){
+            createUser(function(token){
+                if(token){
+                    console.log(token);
+                    var url = APIURL+'/actions/search'; //?type='+userStandard.type;
+                    var requestParams={
+                        url:url,
+                        headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},
+                        body:JSON.stringify({searchterm:{email:userStandard.email,type:'All'}})
+                    };
+                    request.post(requestParams,function(error, response, body){
+                        if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
+                        else{
+                            //console.log(body);
+                            response.statusCode.should.be.equal(200);
+                            var results = JSON.parse(response.body);
+                            results.should.have.property('_metadata');
+                            results.should.have.property('users');
+                            results._metadata.totalCount.should.be.equal(1);
+                            results.users[0].type.should.be.equal(userStandard.type);
+                        }
+                        done();
+                    });
+                }else{
+                    token.should.be.not(null);
+                }
+            })
+
+        });
+    });
+
+
+    describe('POST /actions/search', function(){
+
+        it('must return one user of all type as set in query. fields name ', function(done){
+            createUser(function(token){
+                if(token){
+                    console.log(token);
+                    var url = APIURL+'/actions/search'; //?type='+userStandard.type;
+                    var requestParams={
+                        url:url,
+                        headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},
+                        body:JSON.stringify({fields:["name"],searchterm:{email:userStandard.email,type:'All'}})
+                    };
+                    request.post(requestParams,function(error, response, body){
+                        if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
+                        else{
+                            //console.log(body);
+                            response.statusCode.should.be.equal(200);
+                            var results = JSON.parse(response.body);
+                            results.should.have.property('_metadata');
+                            results.should.have.property('users');
+                            results._metadata.totalCount.should.be.equal(1);
+                            results.users[0].type.should.be.equal(userStandard.type);
+                            results.users[0].should.have.property('name');
+                            results.users[0].should.have.property('type');
+                            results.users[0].should.not.have.property('surname');
+                            results.users[0].should.not.have.property('email');
+                        }
+                        done();
+                    });
+                }else{
+                    token.should.be.not(null);
+                }
+            })
+
+        });
+    });
+
+
+
+    describe('POST /actions/search', function(){
+
+        it('must return one user by name search ', function(done){
+            createUser(function(token){
+                if(token){
+                    console.log(token);
+                    var url = APIURL+'/actions/search'; //?type='+userStandard.type;
+                    var requestParams={
+                        url:url,
+                        headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},
+                        body:JSON.stringify({searchterm:{name:userStandard.name.substring(1,3)}})
+                    };
+                    request.post(requestParams,function(error, response, body){
+                        if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
+                        else{
+                            //console.log(body);
+                            response.statusCode.should.be.equal(200);
+                            var results = JSON.parse(response.body);
+                            results.should.have.property('_metadata');
+                            results.should.have.property('users');
+                            results._metadata.totalCount.should.be.equal(1);
+                        }
+                        done();
+                    });
+                }else{
+                    token.should.be.not(null);
+                }
+            })
+
+        });
+    });
+
+
+    describe('POST /actions/search', function(){
+
+        it('must not found a user of a type set in query ', function(done){
+            createUser(function(token){
+                if(token){
+                    console.log(token);
+                    var url = APIURL+'/actions/search'; //?type='+userStandard.type;
+                    var requestParams={
+                        url:url,
+                        headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},
+                        body:JSON.stringify({searchterm:{email:userStandard.email,type:"notexist"}})
+                    };
+                    request.post(requestParams,function(error, response, body){
+                        if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
+                        else{
+                            //console.log(body);
+                            response.statusCode.should.be.equal(200);
+                            var results = JSON.parse(response.body);
+                            results.should.have.property('_metadata');
+                            results.should.have.property('users');
+                            results._metadata.totalCount.should.be.equal(0);
+                            results.users.length.should.be.equal(0);
+                        }
+                        done();
+                    });
+                }else{
+                    token.should.be.not(null);
+                }
+            })
+
+        });
+    });
+
+
+
 
 
     

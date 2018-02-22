@@ -32,12 +32,14 @@ var conf=require('../config').conf;
 var request = require('request');
 var comminFunctions=require("./commonfunctions");
 var async=require('async');
+var array_merge=require('array-merge-by-key');
 
 var microserviceBaseURL=conf.authUrl;
-var microserviceTokem=conf.auth_token;
+var microserviceToken=conf.auth_token;
 
 router.use(middlewares.parsePagination);
 router.use(middlewares.parseFields);
+
 
 
 // Begin Macro
@@ -289,7 +291,7 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
 
     var rqparams = {
         url: microserviceBaseURL + '/authuser/signup',
-        headers: {'Authorization': "Bearer " + microserviceTokem, 'content-type': 'application/json'},
+        headers: {'Authorization': "Bearer " + microserviceToken, 'content-type': 'application/json'},
         body: JSON.stringify({user: loginUser})
     };
 
@@ -313,7 +315,7 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
                         if (err) {
                             rqparams = {
                                 url: microserviceBaseURL + '/authuser/' + user._id,
-                                headers: {'Authorization': "Bearer " + microserviceTokem}
+                                headers: {'Authorization': "Bearer " + microserviceToken}
                             };
 
                             request.delete(rqparams, function (error, response, body) {
@@ -334,7 +336,7 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
                 } catch (ex) {
                     rqparams = {
                         url: microserviceBaseURL + '/authuser/' + user._id,
-                        headers: {'Authorization': "Bearer " + microserviceTokem}
+                        headers: {'Authorization': "Bearer " + microserviceToken}
                     };
                     request.delete(rqparams, function (error, response, body) {
                         if (error)
@@ -431,7 +433,7 @@ router.post('/signin', [jwtMiddle.decodeToken], function (req, res) {
 
     var rqparams = {
         url: microserviceBaseURL + '/authuser/signin',
-        headers: {'Authorization': "Bearer " + microserviceTokem, 'content-type': 'application/json'},
+        headers: {'Authorization': "Bearer " + microserviceToken, 'content-type': 'application/json'},
         body: JSON.stringify({username: username, password: password})
     };
 
@@ -498,7 +500,7 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res,next) {
 
     var query = {};
 
-    var ids=req.query.usersId;
+    var ids=(req.query && req.query.usersId) || null;
 
     if(ids) {
         if (_.isArray(ids)) { //is an array
@@ -507,7 +509,6 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res,next) {
             query._id=ids;
         }
     }
-
 
 
 
@@ -523,8 +524,9 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res,next) {
     try {
         if (!err) {
 
-            if (results)
-                res.status(200).send(results);
+            if (results) {
+                    res.status(200).send(results);
+            }
             else
                 res.status(204).send();
         }
@@ -806,7 +808,7 @@ function enableDisable(req, res, value) {
 
     var rqparams = {
         url: value ? microserviceBaseURL + "/authuser/" + id + '/actions/enable' : microserviceBaseURL + "/authuser/" + id + '/actions/disable',
-        headers: {'Authorization': "Bearer " + microserviceTokem}
+        headers: {'Authorization': "Bearer " + microserviceToken}
     };
 
     request.post(rqparams, function (error, response, body) {
@@ -933,7 +935,7 @@ router.post('/:id/actions/resetpassword', [jwtMiddle.decodeToken], function (req
                 } else {
                     var rqparams = {
                         url: microserviceBaseURL + "/authuser/" + id + '/actions/resetpassword',
-                        headers: {'Authorization': "Bearer " + microserviceTokem}
+                        headers: {'Authorization': "Bearer " + microserviceToken}
                     };
 
                     request.post(rqparams, function (error, response, body) {
@@ -1091,7 +1093,7 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
 
                         var rqparams = {
                             url: microserviceBaseURL + "/tokenactions/gettokentypelist",
-                            headers: {'Authorization': "Bearer " + microserviceTokem}
+                            headers: {'Authorization': "Bearer " + microserviceToken}
                         };
 
                         request.get(rqparams, function (error, response, body) {
@@ -1144,7 +1146,7 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
                 } else {
                     var rqparams = {
                         url: microserviceBaseURL + "/authuser/" + id + '/actions/setpassword',
-                        headers: {'Authorization': "Bearer " + microserviceTokem, 'content-type': 'application/json'},
+                        headers: {'Authorization': "Bearer " + microserviceToken, 'content-type': 'application/json'},
                         body: JSON.stringify(tmpbody)
                     };
 
@@ -1352,7 +1354,7 @@ router.delete('/:id', [jwtMiddle.decodeToken], function (req, res) {
 
     var rqparams = {
         url: microserviceBaseURL + "/authuser/" + id,
-        headers: {'Authorization': "Bearer " + microserviceTokem}
+        headers: {'Authorization': "Bearer " + microserviceToken}
     };
 
     request.delete(rqparams, function (error, response, body) {
@@ -1388,8 +1390,9 @@ router.delete('/:id', [jwtMiddle.decodeToken], function (req, res) {
 /**
  * @api {get} /actions/email/find/:term Search all Users
  * @apiVersion 1.0.0
- * @apiName Search User
+ * @apiName Search user by email
  * @apiGroup Users
+ * @apiDeprecated use now (#Users:Search Users).
  *
  * @apiDescription Protected by admin access token, returns the paginated list of all Users matching the search term
  * Set pagination skip and limit, in the URL request, e.g. "get /users?skip=10&limit=50"
@@ -1415,28 +1418,218 @@ router.delete('/:id', [jwtMiddle.decodeToken], function (req, res) {
  */
 router.get('/actions/email/find/:term', [jwtMiddle.decodeToken], function (req, res) {
 
-    var term = req.params.term,
-        size = req.query.size ? parseInt(req.query.size) : 10,
-        query = {},
-        sortParams = {};
+    return util.deprecate( function() {
+        var term = req.params.term,
+            size = req.query.size ? parseInt(req.query.size) : 10,
+            query = {},
+            sortParams = {};
 
-    if (!term) return res.json({'status': true, err: 1, 'message': 'term not found', data: []});
+        if (!term) return res.json({'status': true, err: 1, 'message': 'term not found', data: [],'warning':'actions/email/find/:term route is deprecated. Use /actions/search route instead'});
 
-    query.email = new RegExp(term, 'i');
+        query.email = new RegExp(term, 'i');
 
-    User.find(query, null, {
-        limit: size,
-        sort: sortParams
-    }, function (err, data) {
+        User.find(query, null, {
+            limit: size,
+            sort: sortParams
+        }, function (err, data) {
+            try {
+                if (err) return res.json({'status': false, 'err': err,'warning':'actions/email/find/:term route is deprecated. Use /actions/search route instead'});
+
+                return res.json({status: true, data: data,'warning':'actions/email/find/:term route is deprecated. Use /actions/search route instead'});
+            }catch (ex){
+                return res.status(500).send({error:"InternalError", error_message: ex,'warning':'actions/email/find/:term route is deprecated. Use /actions/search route instead'});
+            }
+        });
+    },'actions/email/find/:term route is deprecated. Use /actions/search route instead.')();
+
+
+});
+
+
+
+
+/**
+ * @api {get} /users/ Search all Users
+ * @apiVersion 1.0.0
+ * @apiName Search Users
+ * @apiGroup Users
+ *
+ * @apiDescription Protected by admin access token, returns a list of all Users that match a search terms.
+ * If you need a filter by _id you can done it by set field 'usersId'. usersId field can be in ObjectId on a ObjectId array.
+ *
+ * @apiHeader {String} [Authorization] Unique access_token. If set, the same access_token in body or in query param must be undefined
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
+ * @apiParam {String} [access_token] Access token that grants access to this resource. It must be sent in [ body || as query param ].
+ * If set, the same token sent in Authorization header should be undefined
+ * @apiParam (body Parameter) {Object} searchterm                   Object containing search terms
+ * @apiParam (body Parameter) {String} [searchterm.type]            String containing user type filter. If filter is not set, user type information are not available in search results. If user type filter is not needed but user type information are, set type to "all"
+ * @apiParam (body Parameter) {String} [searchterm.UserField_1]     String containing a filter on user field "UserField_1", e.g. UserField_1 : "UserField_1_Substring"
+ * @apiParam (body Parameter) {String} [searchterm.UserField_2]     String containing a filter on user field "UserField_2", e.g. UserField_2 : "UserField_2_Substring"
+ * @apiParam (body Parameter) {String} [searchterm.UserField_3]     String containing a filter on user field "UserField_3", e.g. UserField_3 : "UserField_1_Substring"
+ * @apiParam (body Parameter) {Array} fields Array of strings containing the name of all the user fields that must be returned
+ *
+ * @apiParamExample {json} Request-Example:
+ * HTTP/1.1 POST request
+ *  Body:{ "searchterm":{"email": "@prova.it" , "type":"crocierista"}, fields:["name","surname"]}
+ * @apiUse Metadata
+ * @apiUse GetResource
+ * @apiUse GetResourceExample
+ * @apiUse Unauthorized
+ * @apiUse BadRequest
+ * @apiUse ServerError
+ */
+
+
+router.post('/actions/search', [jwtMiddle.decodeToken], function (req, res,next) {
+
+
+
+    if (!req.body) return res.status(400).send({error: "BadRequest", error_message: "body missing"});
+    if (!req.body.searchterm) return res.status(400).send({error: "BadRequest", error_message: "mandatory 'searchterm' body param not found"});
+
+    if (req.body.fields && !(Array.isArray(req.body.fields)) ) return res.status(400).send({
+        error: "BadRequest",
+        error_message: "field param must be an array"
+    });
+
+
+    var fields = req.body.fields;
+
+    if (!fields)
+        fields = '-hash -salt -__v';
+    else
+        fields = fields.join(" ");
+
+
+
+    var searchterm=req.body.searchterm;
+
+
+
+    var query = {};
+
+    var ids=(searchterm.usersId) || null;
+
+    if(ids) {
+        if (_.isArray(ids)) { //is an array
+            query._id={ "$in": ids };
+        } else {
+            query._id=ids;
+        }
+    }
+
+
+
+    for (var v in searchterm) {
+        if (User.schema.path(v)) {
+            query[v] = new RegExp(searchterm[v], 'i');
+        }
+    }
+
+
+
+
+    var typeOption=query.type || searchterm.type || null;
+    if(typeOption){
+        delete query.type;
+    }
+
+
+    User.find(query, fields, function(err, results){
+
         try {
-            if (err) return res.json({'status': false, 'err': err});
+            if (!err) {
 
-            return res.json({status: true, data: data});
+                if (results) {
+                    var responseResults={users:results,_metadata:{totalCount:results.length, skip:-1,limit:-1}};
+
+                    if (typeOption && (responseResults._metadata.totalCount>0))
+                        upgradeUserInfo(res, responseResults,typeOption);
+                    else
+                        res.status(200).send(responseResults);
+                }
+                else
+                    res.status(204).send();
+            }
+            else {
+                res.status(500).send({error: 'internal_error', error_message: 'something blew up, ERROR:' + err});
+            }
         }catch (ex){
-            return res.status(500).send(ex);
+            return res.status(500).send({error: 'internal_error', error_message: 'something blew up, ERROR:' + ex});
         }
     });
+
 });
+
+
+
+
+
+function upgradeUserInfo(res, results,type){
+
+
+    // get usersId
+    var ids=_.map(results.users,function(element){
+        return element.id;
+    });
+
+
+    //make a request to authMs
+    var rqparams = {
+        url: microserviceBaseURL + "/authuser/actions/ids/find",
+        headers: {'Authorization': "Bearer " + microserviceToken, 'content-type': 'application/json'},
+        body: JSON.stringify({ids:ids,fields:["type"]})
+    };
+
+    request.post(rqparams, function (error, response, body) {
+
+        try {
+            if (error) {
+                return res.status(500).send({
+                    error: 'InternalError',
+                    error_message: error + ""
+                });
+            } else {
+
+                var parsedBody = JSON.parse(body);
+                if (parsedBody.error) {
+                    return res.status(response.statusCode).send(parsedBody);
+                } else {
+
+                    var authUserResults= JSON.parse(body);
+
+                    if(authUserResults._metadata.totalCount>0 && (authUserResults._metadata.totalCount==results._metadata.totalCount)){
+                        var usersList=array_merge("_id", JSON.parse(JSON.stringify(results.users)),authUserResults.users);
+
+                        if(type.toLowerCase()!='all'){
+                            type=type.toLowerCase();
+                            usersList=_.filter(usersList, function(currentUser){
+                                return (currentUser.type.toLowerCase()==type);
+                            });
+                        }
+
+                        results.users=usersList;
+                        results._metadata.totalCount=usersList.length;
+                        return res.status(200).send(results);
+                    }else{
+                        return res.status(409).send({
+                            error: 'conflict',
+                            error_message: "Inconsistent User Data between userms and authms"
+                        });
+                    }
+                }
+            }
+        }catch (ex){
+            return res.status(500).send({
+                error: 'InternalError',
+                error_message: ex + ""
+            });
+        }
+    });
+}
 
 
 module.exports = router;
