@@ -359,7 +359,7 @@ describe('Users API', function () {
                     var requestParams={
                         url:url,
                         headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},
-                        body:JSON.stringify({searchterm:{email:userStandard.email,type:userStandard.type}})
+                        body:JSON.stringify({searchterm:{email:userStandard.email,type:[userStandard.type]}})
                     };
                     request.post(requestParams,function(error, response, body){
                         if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
@@ -393,7 +393,7 @@ describe('Users API', function () {
                     var requestParams={
                         url:url,
                         headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},
-                        body:JSON.stringify({searchterm:{email:userStandard.email,type:'All'}})
+                        body:JSON.stringify({searchterm:{email:userStandard.email,type:['All']}})
                     };
                     request.post(requestParams,function(error, response, body){
                         if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
@@ -427,7 +427,7 @@ describe('Users API', function () {
                     var requestParams={
                         url:url,
                         headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},
-                        body:JSON.stringify({fields:["name"],searchterm:{email:userStandard.email,type:'All'}})
+                        body:JSON.stringify({fields:["name"],searchterm:{email:userStandard.email,type:['All']}})
                     };
                     request.post(requestParams,function(error, response, body){
                         if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
@@ -499,7 +499,7 @@ describe('Users API', function () {
                     var requestParams={
                         url:url,
                         headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},
-                        body:JSON.stringify({searchterm:{email:userStandard.email,type:"notexist"}})
+                        body:JSON.stringify({searchterm:{email:userStandard.email,type:["notexist"]}})
                     };
                     request.post(requestParams,function(error, response, body){
                         if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
