@@ -1449,7 +1449,7 @@ router.get('/actions/email/find/:term', [jwtMiddle.decodeToken], function (req, 
 
 
 /**
- * @api {get} /users/ Search all Users
+ * @api {get} /users//actions/search Search all Users
  * @apiVersion 1.0.0
  * @apiName Search Users
  * @apiGroup Users

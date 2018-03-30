@@ -491,7 +491,43 @@ describe('Users API', function () {
 
     describe('POST /actions/search', function(){
 
-        it('must not found a user of a type set in query ', function(done){
+        it('must search one user by id', function(done){
+
+            Users.findOne({},function(err,userID){
+                if(!err){
+                    var url = APIURL+'/actions/search'; //?type='+userStandard.type;
+                    var requestParams={
+                        url:url,
+                        headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},
+                        body:JSON.stringify({searchterm:{usersId:[userID._id]}})
+                    };
+                    request.post(requestParams,function(error, response, body){
+                        if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
+                        else{
+                            //console.log(body);
+                            response.statusCode.should.be.equal(200);
+                            var results = JSON.parse(response.body);
+                            results.should.have.property('_metadata');
+                            results.should.have.property('users');
+                            results._metadata.totalCount.should.be.equal(1);
+                            results.users.length.should.be.equal(1);
+                            var usId=JSON.stringify(userID._id);
+                            (usId).should.be.equal(JSON.stringify(results.users[0]._id));
+                        }
+                        done();
+                    });
+                }else{
+                    err.should.be(null);
+                }
+            });
+
+        });
+    });
+
+
+    describe('POST /actions/search', function(){
+
+        it('must not found a user of a type set in query', function(done){
             createUser(function(token){
                 if(token){
                     console.log(token);
@@ -521,9 +557,6 @@ describe('Users API', function () {
 
         });
     });
-
-
-
 
 
     
