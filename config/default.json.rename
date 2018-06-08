@@ -16,7 +16,22 @@
     "testConfig":{
       "usertokens":["UserType1"],
       "adminokens":["admin"],
-      "authApptokens":["webui"]
+      "authApptokens":["webui"],
+      "adminLogin": {
+        "username": "admin@admin.com",
+        "password": "admin"
+      },
+      "userTypeTest":{
+        "name": "Micio",
+        "email": "mario@cmc.com",
+        "password": "miciomicio",
+        "surname":"Macio"
+      },
+      "webUiAppTest":{
+        "email": "webui@webui.it",
+        "password": "miciomicio"
+      },
+      "msName":"cmc-user"
     },
     "exampleUrl":"Your_Project_API_URL"
   },

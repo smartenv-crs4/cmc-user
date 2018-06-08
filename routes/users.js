@@ -468,6 +468,7 @@ router.post('/signin', [jwtMiddle.decodeToken], function (req, res) {
  *
  * @apiDescription Protected by admin access token, returns a paginated list of all Users.
  * Set pagination skip and limit and other filters in the URL request, e.g. "get /users?skip=10&limit=50&name=Mario"
+ * filter by type are not valid, use search actions to filter by user type
  * If you need a filter by _id you can done it by set field 'usersId'. usersId field can be in ObjectId on a ObjectId array.
  *
  * @apiHeader {String} [Authorization] Unique access_token. If set, the same access_token in body or in query param must be undefined
@@ -494,7 +495,15 @@ router.post('/signin', [jwtMiddle.decodeToken], function (req, res) {
 
 router.get('/', [jwtMiddle.decodeToken], function (req, res,next) {
 
+    if(req.query.type)
+        res.status(400).send({error: 'BadRequest', error_message: 'Filter by user type are not valid, use search actions to filter types'});
+
+
     var fields = req.dbQueryFields;
+    var notReturnType=false;
+    if((fields && (!fields.indexOf('type')>=0)) || (fields && (!fields.indexOf('TYPE')>=0)) || (fields && (fields.indexOf('-type')>=0)) || (fields && (fields.indexOf('-TYPE')>=0)))
+        notReturnType=true;
+
     if (!fields)
         fields = '-hash -salt -__v';
 
@@ -525,7 +534,11 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res,next) {
         if (!err) {
 
             if (results) {
+
+                if(notReturnType)
                     res.status(200).send(results);
+                else
+                    upgradeUserInfo(res, results,["all"]);
             }
             else
                 res.status(204).send();
@@ -534,7 +547,7 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res,next) {
             res.status(500).send({error: 'internal_error', error_message: 'something blew up, ERROR:' + err});
         }
     }catch (ex){
-        return res.status(500).send(ex);
+        return res.status(500).send({error:"InternalError", error_message:ex});
     }
     });
 
@@ -542,7 +555,7 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res,next) {
 
 
 /**
- * @api {post} /users/ Register a new Admin User
+ * @api {post} /users/ Create User
  * @apiVersion 1.0.0
  * @apiName Create Admin User
  * @apiGroup Users
@@ -636,7 +649,7 @@ router.post('/', [jwtMiddle.decodeToken], function (req, res) {
 /**
  * @api {get} /users/:id Get the User by id
  * @apiVersion 1.0.0
- * @apiName GetUser
+ * @apiName GetUserById
  * @apiGroup Users
  *
  * @apiDescription Protected by admin access token or by the user itself, returns the info about a User.
@@ -672,6 +685,12 @@ router.post('/', [jwtMiddle.decodeToken], function (req, res) {
 router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf], function (req, res) {
 
     var fields = req.dbQueryFields;
+    var notReturnType=false;
+
+    if((fields && (!fields.indexOf('type')>=0)) || (fields && (!fields.indexOf('TYPE')>=0)) || (fields && (fields.indexOf('-type')>=0)) || (fields && (fields.indexOf('-TYPE')>=0)))
+        notReturnType=true;
+
+
     if (!fields)
         fields = '-hash -salt -__v';
 
@@ -680,7 +699,22 @@ router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
     User.findById(id, fields, function(err, results){
         try {
             if (!err) {
-                res.send(results);
+                if(notReturnType)
+                    res.send(results);
+                else{
+                    var rqparams = {
+                        url: microserviceBaseURL + "/authuser/"+id,
+                        headers: {'Authorization': "Bearer " + microserviceToken, 'content-type': 'application/json'},
+                    };
+
+                    request.get(rqparams, function (error, response) {
+                        if(error) res.status(500).send({error: 'internal_error', error_message: 'something blew up in get user Type from auth ms, ERROR:' + err});
+
+                        var resultWithType=_.clone(results);
+                        resultWithType.type=response.body.type || null;
+                        res.send(resultWithType);
+                    });
+                }
             }
             else {
                 if (results === {} || results === undefined) res.status(404).send({
@@ -690,7 +724,7 @@ router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
                 else res.status(500).send({error: 'internal_error', error_message: 'something blew up, ERROR:' + err});
             }
         }catch (ex){
-            return res.status(500).send(ex);
+            return res.status(500).send({error:"InternalError", error_message:ex});
         }
     });
 
@@ -773,9 +807,10 @@ router.put('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
         return res.status(401).send({error: "Forbidden", error_message: 'only admins users can update email'});
     }
 
-    if (!(conf.adminUser.indexOf(req.User_App_Token.type) >= 0) && newVals.type && (conf.adminUser.indexOf(newVals.type) >= 0)) {
-        return res.status(401).send({error: "Forbidden", error_message: 'only admins users can update user type to admin user'});
+    if (newVals.type) {
+        return res.status(400).send({error: "BadRequest", error_message: 'to update User type must use "actions/setusertype/:type" endpoint'});
     }
+
 
     User.findOneAndUpdate({_id:id}, newVals, {new: true}, function (err, results) {
 
@@ -1179,14 +1214,14 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
 });
 
 
-
 /**
- * @api {post} /users/:id/actions/changeuserid Change User Id (email)
+ * @api {post} /users/:id/actions/changeuserid Change Username (email)
  * @apiVersion 1.0.0
  * @apiName ChangeUserId
  * @apiGroup Users
+ * @apiDeprecated use now (#Users:ChangeUsername).
  *
- * @apiDescription Protected by admin access token, updates a user username (email).
+ * @apiDescription Protected by admin access token, updates a user username (email). Only for Admin users
  *
  * @apiHeader {String} [Authorization] Unique access_token. If set, the same access_token in body or in query param must be undefined
  * @apiHeaderExample {json} Header-Example:
@@ -1237,6 +1272,129 @@ router.post('/:id/actions/changeuserid', [jwtMiddle.decodeToken], function (req,
     }
 
 });
+
+
+/**
+ * @api {post} /users/:id/actions/changeusername Change Username (email)
+ * @apiVersion 1.0.0
+ * @apiName ChangeUsername
+ * @apiGroup Users
+ *
+ * @apiDescription Protected by admin access token, updates a user username (email). Only for Admin users
+ *
+ * @apiHeader {String} [Authorization] Unique access_token. If set, the same access_token in body or in query param must be undefined
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
+ * @apiParam {String} [access_token] Access token that grants access to this resource. It must be sent in [ body || as query param ].
+ * If set, the same token sent in Authorization header should be undefined
+ * @apiParam (URL Parameter) {String} id        User id or username (email)
+ * @apiParam (Body Parameter) {String} email    The new username (email)
+ *
+ * @apiParamExample {json} Request-Example:
+ * HTTP/1.1 GET request
+ *  Body:{ "email": "prov@prova.it"}
+ *
+ * @apiSuccess (200- OK) {Object} user  dictionary with new updated username(email)
+ *
+ * @apiSuccessExample {json} Example: 200 OK
+ *      HTTP/1.1 200 OK
+ *      {
+ *        "name":"Micio",
+ *        "surname":"Macio",
+ *        "email": "prov@prova.it"
+ *      }
+ *
+ * @apiUse Unauthorized
+ * @apiUse NotFound
+ * @apiUse BadRequest
+ * @apiUse ServerError
+ * @apiSampleRequest off
+ */
+router.post('/:id/actions/changeusername', [jwtMiddle.decodeToken], function (req, res, next) {
+
+    var id = (req.params.id).toString();
+    req.url = "/" + id;
+
+    if(!req.body || !req.body.email)
+        return res.status(400).send({error:"BadRequest", error_message:"no email field in body. email are mandatory"});
+
+    var body = {user: {email:req.body.email}};
+    req.body = body;
+
+    req.method = "PUT";
+    try {
+        router.handle(req, res, next);
+    } catch (ex) {
+        res.status(500).send({error: "InternalError", error_message: ex.toString()});
+    }
+
+});
+
+
+
+
+
+/**
+ * @api {post} /users/:id/actions/setusertype/:type Set or update User type
+ * @apiVersion 1.0.0
+ * @apiName set or update User type
+ * @apiGroup Users
+ *
+ * @apiDescription Protected by access token, set or update User type.
+ *
+ * @apiHeader {String} [Authorization] Unique access_token. If set, the same access_token in body or in query param must be undefined
+ * @apiHeaderExample {json} Header-Example:
+ *     {
+ *       "Authorization": "Bearer yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoidXNlciIsImlzcyI6IjU4YTMwNTcxM"
+ *     }
+ *
+ * @apiParam {String} [access_token] Access token that grants access to this resource. It must be sent in [ body || as query param ].
+ * If set, the same token sent in Authorization header should be undefined
+ * @apiParam (URL parameter) {String} id    The User id
+ * @apiParam (URL parameter) {String} type  The User type to set
+ *
+ * @apiSuccess (200 - OK) {String} User.id   The User id
+ * @apiSuccess (200 - OK) {String} User.tye   The new User type
+ *
+ * @apiSuccessExample {json} Example: 200 OK
+ *      HTTP/1.1 200 OK
+ *      {
+ *        "id":"02550564065",
+ *        "type":"admin"
+ *      }
+ *
+ * @apiUse Unauthorized
+ * @apiUse NotFound
+ * @apiUse BadRequest
+ * @apiUse ServerError
+ * @apiSampleRequest off
+ */
+router.post('/:id/actions/setusertype/:type', [jwtMiddle.decodeToken], function (req, res) {
+        "use strict";
+
+        var id = req.params.id;
+        var userType=req.params.type;
+
+        var rqparams = {
+            url: microserviceBaseURL + "/authuser/" + id + '/actions/setusertype/'+userType,
+            headers: {'Authorization': "Bearer " + microserviceToken}
+        };
+
+    request.post(rqparams, function (error, response, body) {
+        try {
+            if (error) {
+                return res.status(500).send({error: 'internal_User_microservice_error', error_message: error + ""});
+            } else {
+                return res.status(200).send(body);
+            }
+        }catch (ex){
+            return res.status(500).send(ex);
+        }
+    });
+    }
+);
 
 
 
@@ -1449,7 +1607,7 @@ router.get('/actions/email/find/:term', [jwtMiddle.decodeToken], function (req, 
 
 
 /**
- * @api {get} /users//actions/search Search all Users
+ * @api {post} /users//actions/search Search all Users
  * @apiVersion 1.0.0
  * @apiName Search Users
  * @apiGroup Users

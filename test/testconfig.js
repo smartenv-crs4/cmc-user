@@ -33,25 +33,11 @@ function customTestConfig(config){
 
 
 
-    
-    
     testConfig.myWebUITokenToSignUP=config.auth_token;
-    testConfig.userTypeTest={
-                        "name": "Micio",
-                        "email": "mario@cmc.com",
-                        "password": "miciomicio",
-                        "surname":"Macio",
-                        "type": testConfig.usertokens[0]
-    };
-    testConfig.webUiAppTest={
-                    "email": "webui@webui.it",
-                    "password": "miciomicio",
-                    "type": testConfig.authApptokens[0]
-    };
-    testConfig.adminLogin={
-                    "username": "admin@admin.com",
-                    "password": "admin"
-    };
+    testConfig.userTypeTest.type= testConfig.usertokens[0];
+    testConfig.webUiAppTest.type= testConfig.authApptokens[0];
+
+
 
     testConfig.AuthRoles=[
                 {URI:"/users", token:testConfig.adminokens, method:"GET"},

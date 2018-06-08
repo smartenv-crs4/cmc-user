@@ -142,9 +142,10 @@ exports.setAuthMsMicroservice=function(doneCallback){
                 var rqparams={
                     url:url+"/authms/authendpoint",
                     headers: {'content-type': 'application/json', 'Authorization': "Bearer " + conf.auth_token},
-                    body:JSON.stringify({microservice:{name:"userms",URI:value.URI, authToken:value.token, method:value.method}})
+                    body:JSON.stringify({microservice:{name:conf.testConfig.msName,URI:value.URI, authToken:value.token, method:value.method}})
                 };
                 request.post(rqparams, function(error, response, body){
+
                     if(error) {
                         throw err;
                         clb("err");

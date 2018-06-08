@@ -121,7 +121,7 @@ describe('Users API', function () {
         it('must return ONE user and _metadata, all fields', function (done) {
 
             request.get({
-                url: APIURL + '?skip=0&limit=1',
+                url: APIURL + '?skip=0&limit=1&fields=-type',
                 headers: {'Authorization': "Bearer " + adminToken}
             }, function (error, response, body) {
 
@@ -156,7 +156,7 @@ describe('Users API', function () {
         it('must return 2 users and _metadata, all fields', function (done) {
 
             request.get({
-                url: APIURL + '?skip=0&limit=2',
+                url: APIURL + '?skip=0&limit=2&fields=-type',
                 headers: {'Authorization': "Bearer " + adminToken}
             }, function (error, response, body) {
 
