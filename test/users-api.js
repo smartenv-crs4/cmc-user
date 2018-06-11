@@ -116,7 +116,7 @@ describe('Users API', function () {
 
 
 
-    describe('GET /user', function () {
+    describe('GET /users', function () {
 
         it('must return ONE user and _metadata, all fields', function (done) {
 
@@ -151,7 +151,7 @@ describe('Users API', function () {
     });
 
 
-    describe('GET /authuser', function () {
+    describe('GET /users', function () {
 
         it('must return 2 users and _metadata, all fields', function (done) {
 
@@ -185,7 +185,7 @@ describe('Users API', function () {
 
 
 
-    describe('GET /authuser', function () {
+    describe('GET /users', function () {
 
         it('must return  error 400 for invalid token', function (done) {
 
@@ -207,7 +207,7 @@ describe('Users API', function () {
     });
 
 
-    describe('GET /authuser', function () {
+    describe('GET /users', function () {
 
         it('must return  error 401 for not Authorized token', function (done) {
 
@@ -234,7 +234,7 @@ describe('Users API', function () {
 
 
 
-    describe('GET /authuser', function () {
+    describe('GET /users', function () {
 
         it('must return  no error for invalid field', function (done) {
 
@@ -263,7 +263,7 @@ describe('Users API', function () {
 
 
 
-    describe('GET /authuser', function () {
+    describe('GET /users', function () {
 
         it('must return  error 400 for Access_token required', function (done) {
 
@@ -322,7 +322,7 @@ describe('Users API', function () {
 
 
 
-    describe('POST /actions/search', function(){
+    describe('POST /users/actions/search', function(){
 
         it('must search and return all users ', function(done){
             var bodyParam=JSON.stringify({searchterm:{}});
@@ -349,7 +349,7 @@ describe('Users API', function () {
 
 
 
-    describe('POST /actions/search', function(){
+    describe('POST /users/actions/search', function(){
 
         it('must return one user of a type set in query ', function(done){
             createUser(function(token){
@@ -383,7 +383,7 @@ describe('Users API', function () {
     });
 
 
-    describe('POST /actions/search', function(){
+    describe('POST /users/actions/search', function(){
 
         it('must return one user of all type as set in query ', function(done){
             createUser(function(token){
@@ -417,7 +417,7 @@ describe('Users API', function () {
     });
 
 
-    describe('POST /actions/search', function(){
+    describe('POST /users/actions/search', function(){
 
         it('must return one user of all type as set in query. fields name ', function(done){
             createUser(function(token){
@@ -456,7 +456,7 @@ describe('Users API', function () {
 
 
 
-    describe('POST /actions/search', function(){
+    describe('POST /users/actions/search', function(){
 
         it('must return one user by name search ', function(done){
             createUser(function(token){
@@ -489,7 +489,7 @@ describe('Users API', function () {
     });
 
 
-    describe('POST /actions/search', function(){
+    describe('POST /users/actions/search', function(){
 
         it('must search one user by id', function(done){
 
@@ -525,7 +525,7 @@ describe('Users API', function () {
     });
 
 
-    describe('POST /actions/search', function(){
+    describe('POST /users/actions/search', function(){
 
         it('must not found a user of a type set in query', function(done){
             createUser(function(token){
@@ -560,7 +560,7 @@ describe('Users API', function () {
 
 
     
-    describe('GET /authuser/:id', function(){
+    describe('GET /users/:id', function(){
     
         it('must return a user by id, all fields', function(done){
             createUser(function(token){
@@ -587,7 +587,7 @@ describe('Users API', function () {
     });
 
 
-    describe('GET /authuser/:id', function(){
+    describe('GET /users/:id', function(){
 
         it('must return a user by id, fields type', function(done){
             createUser(function(token){
@@ -613,7 +613,7 @@ describe('Users API', function () {
         });
     });
 
-    describe('GET /authuser/:id', function(){
+    describe('GET /users/:id', function(){
 
         it('must return a user by id, send an invalid field', function(done){
             createUser(function(token){
@@ -644,7 +644,7 @@ describe('Users API', function () {
 
 
 
-    describe('GET /authuser/:id', function(){
+    describe('GET /users/:id', function(){
 
         it('must return a 404, user not found', function(done){
             createUser(function(token){
@@ -667,7 +667,7 @@ describe('Users API', function () {
 
 
 
-    describe('GET /authuser/:id', function(){
+    describe('GET /users/:id', function(){
 
         it('must return a 401, user with invalid ID', function(done){
             createUser(function(token){
@@ -689,9 +689,38 @@ describe('Users API', function () {
     });
 
 
+    describe('GET /users/:id', function(){
+
+        it('must test the user type field from auth', function(done){
+            createUser(function(token){
+                if(token){
+                    var url = APIURL+'/'+clientId;
+                    request.get({url:url,headers:{'Authorization' : "Bearer "+ token}},function(error, response, body){
+                        if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
+                        else{
+                            response.statusCode.should.be.equal(200);
+                            var results = JSON.parse(response.body);
+                            results.should.have.property('email');
+                            results.should.have.property('name');
+                            results.should.have.property('surname');
+                            results.should.have.property('type');
+                            results.type.should.be.equal(userStandard.type);
+                            results.should.not.have.property('salt');
+                        }
+                        done();
+                    });
+                }else{
+                    token.should.be.not(null);
+                }
+            })
+
+        });
+    });
 
 
-    describe('DELETE /user/:id', function(){
+
+
+    describe('DELETE /users/:id', function(){
 
         it('must delete a user by id', function(done){
             createUser(function(token){
@@ -719,7 +748,7 @@ describe('Users API', function () {
     });
 
 
-    describe('DELETE /user/:id', function(){
+    describe('DELETE /users/:id', function(){
 
         it('must return error 404 in delete a user by invalid id', function(done){
             createUser(function(token){
@@ -748,7 +777,7 @@ describe('Users API', function () {
 
 
 
-    describe('GET /authuser/:id', function(){
+    describe('GET /users/:id/actions/enable', function(){
 
         it('must disable and enable a User', function(done){
             createUser(function(tokenUtente){

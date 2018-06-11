@@ -711,8 +711,9 @@ router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
                         if(error) res.status(500).send({error: 'internal_error', error_message: 'something blew up in get user Type from auth ms, ERROR:' + err});
 
                         response.body=JSON.parse(response.body);
-                        var resultWithType=_.clone(results);
+                        var resultWithType=results.toJSON();
                         resultWithType.type=response.body.type || null;
+                        console.log(resultWithType);
                         res.send(resultWithType);
                     });
                 }
