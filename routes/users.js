@@ -708,13 +708,17 @@ router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
                     };
 
                     request.get(rqparams, function (error, response) {
-                        if(error) res.status(500).send({error: 'internal_error', error_message: 'something blew up in get user Type from auth ms, ERROR:' + err});
+                        try {
+                            if(error) res.status(500).send({error: 'internal_error', error_message: 'something blew up in get user Type from auth ms, ERROR:' + err});
 
-                        response.body=JSON.parse(response.body);
-                        var resultWithType=results.toJSON();
-                        resultWithType.type=response.body.type || null;
-                        console.log(resultWithType);
-                        res.send(resultWithType);
+                            response.body=JSON.parse(response.body);
+                            var resultWithType=results.toJSON();
+                            resultWithType.type=response.body.type || null;
+                            console.log(resultWithType);
+                            res.send(resultWithType);
+                        }catch (ex){
+                            return res.status(500).send({error:"InternalError", error_message:ex});
+                        }
                     });
                 }
             }
