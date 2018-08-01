@@ -8,7 +8,7 @@
     "test": "NODE_ENV=test mocha test/"
   },
   "dependencies": {
-    "apiextender": "^3.0.0",
+    "apiextender": "^3.1.0",
     "array-merge-by-key": "^1.0.1",
     "async": "^2.1.2",
     "body-parser": "~1.8.1",
