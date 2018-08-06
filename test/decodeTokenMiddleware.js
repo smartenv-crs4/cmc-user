@@ -193,7 +193,7 @@ describe('Decode Token Midleware API', function () {
                             response.statusCode.should.be.equal(401);
                             results.should.have.property('error');
                             results.should.have.property('error_message');
-                            results.error_message.should.be.equal("Only admin token types can access this resource");
+                            results.error_message.indexOf("Only admin token types can access this resource").should.be.greaterThan(-1);
                         }
                         done();
                     });

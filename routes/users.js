@@ -560,7 +560,7 @@ router.get('/', [jwtMiddle.decodeToken], function (req, res,next) {
  * @apiName Create Admin User
  * @apiGroup Users
  *
- * @apiDescription Accessible by access tokens of admin type. Creates a new User object and returns the access credentials.
+ * @apiDescription Accessible by access tokens. Creates a new User(included admin users) and returns the access credentials.
  *
  * @apiHeader {String} [Authorization] Unique access_token. If set, the same access_token in body or in query param must be undefined
  * @apiHeaderExample {json} Header-Example:
@@ -714,7 +714,6 @@ router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
                             response.body=JSON.parse(response.body);
                             var resultWithType=results.toJSON();
                             resultWithType.type=response.body.type || null;
-                            console.log(resultWithType);
                             res.send(resultWithType);
                         }catch (ex){
                             return res.status(500).send({error:"InternalError", error_message:ex});
@@ -783,7 +782,7 @@ router.get('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
  * @apiUse ServerError
  * @apiSampleRequest off
  */
-router.put('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf], function (req, res) {
+router.put('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf,middlewares.ensureFieldAuthorisedForSomeUsers(comminFunctions.getAdminUsers,["email"],comminFunctions.getRequestBodyUser)], function (req, res) {
 
     if (!req.body || _.isEmpty(req.body)) {
         return res.status(400).send({error: "BadRequest", error_message: 'request body missing'});
@@ -800,24 +799,100 @@ router.put('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
     if (newVals.password) {
         return res.status(400).send({
             error: "BadRequest",
-            error_message: 'password is not a valid param. You must call reset pasword enpoint'
+            error_message: 'password is not a valid param. You must call reset password API'
         });
     }
     if (newVals.enabled) {
         return res.status(400).send({
             error: "BadRequest",
-            error_message: 'enabled or validated is not a valid param. You must call validate enpoint'
+            error_message: 'enabled or validated is not a valid param. You must call validate API'
         });
     }
-    if (!(conf.adminUser.indexOf(req.User_App_Token.type) >= 0) && newVals.email) {
-        return res.status(401).send({error: "Forbidden", error_message: 'only admins users can update email'});
-    }
+
+    // if (!(conf.adminUser.indexOf(req.User_App_Token.type) >= 0) && newVals.email) {
+    //     return res.status(401).send({error: "Forbidden", error_message: 'only admins users can update email'});
+    // }
 
     if (newVals.type) {
-        return res.status(400).send({error: "BadRequest", error_message: 'to update User type must use "actions/setusertype/:type" endpoint'});
+        return res.status(400).send({error: "BadRequest", error_message: 'to update User type must use "actions/setusertype/:type" API'});
     }
 
+    updateUser(id,newVals,function(err,updateResults){
+        if(err){
+            return res.status(err).send(updateResults);
+        }else{
+            return res.status(200).send(updateResults);
+        }
+    });
 
+
+    // User.findOneAndUpdate({_id:id}, newVals, {new: true}, function (err, results) {
+    //
+    //     try {
+    //         if (!err) {
+    //             if (results) {
+    //                 var tmpU = JSON.parse(JSON.stringify(results));
+    //                 delete tmpU['__v'];
+    //                 //delete tmpU['_id'];
+    //                 res.status(200).send(tmpU);
+    //             }
+    //             else {
+    //                 res.status(404).send({error: "user not found", error_message: 'no user found with specified id'});
+    //             }
+    //         }
+    //         else {
+    //             res.status(500).send({error: "internal error", error_message: 'something blew up, ERROR:' + err});
+    //         }
+    //     }catch (ex){
+    //         return res.status(500).send(ex);
+    //     }
+    // });
+
+});
+
+
+function updateUser(id,newVals,callback){
+    if (newVals.email) {
+        updateAuthMsUserName(id,newVals.email,function(err,response){
+            if(err){
+                return callback(err,response);
+            }else{
+                upddateUserToDb(id,newVals,function(err,updateResults){
+                    if(err){
+                        // restore authMS
+                        try {
+                            var resp=JSON.parse(response);
+                            updateAuthMsUserName(id,resp.username.old,function(err,restore){
+                                if(err){
+                                    return callback(409,{error:"Conflict", error_message:"Inconsistent data between Auth and User due to after an error on User Update, was not possible to restore Auth"});
+                                }else{
+                                    return callback(err,updateResults);
+                                }
+                            });
+                        }catch (ex) {
+                            return callback(500,{error:"InternalServerError", error_message:"Error while update username " + ex});
+                        }
+
+                    }else{
+                        return callback(null,updateResults);
+                    }
+                });
+            }
+        });
+    }else{
+        upddateUserToDb(id,newVals,function(err,updateResults){
+            if(err){
+                return callback(err,updateResults);
+            }else{
+                return callback(null,updateResults);
+            }
+        });
+    }
+
+};
+
+
+function upddateUserToDb(id,newVals,callback){
     User.findOneAndUpdate({_id:id}, newVals, {new: true}, function (err, results) {
 
         try {
@@ -825,23 +900,37 @@ router.put('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf],
                 if (results) {
                     var tmpU = JSON.parse(JSON.stringify(results));
                     delete tmpU['__v'];
-                    //delete tmpU['_id'];
-                    res.status(200).send(tmpU);
+                    return callback(null,tmpU);
                 }
                 else {
-                    res.status(404).send({error: "user not found", error_message: 'no user found with specified id'});
+                    return callback(404,{error: "user not found", error_message: 'no user found with specified id'});
                 }
             }
             else {
-                res.status(500).send({error: "internal error", error_message: 'something blew up, ERROR:' + err});
+                return callback(500,{error: "internal error", error_message: 'something blew up, ERROR:' + err});
             }
         }catch (ex){
-            return res.status(500).send(ex);
+            return callback(500,{error: "internal error", error_message: 'something blew up, ERROR:' + ex});
         }
     });
+};
 
-});
+function updateAuthMsUserName(id,username,callback){
 
+    var rqparams = {
+        url: microserviceBaseURL + "/authuser/" + id + '/actions/setusername/'+username,
+        headers: {'Authorization': "Bearer " + microserviceToken}
+    };
+
+    request.post(rqparams, function (error, response, body) {
+        if (error) {
+            return callback(500,{error: 'internal_User_microservice_error', error_message: error + ""});
+        } else {
+            return callback(null,body);
+        }
+
+    });
+}
 
 function enableDisable(req, res, value) {
 
@@ -1259,7 +1348,7 @@ router.post('/:id/actions/setpassword', [jwtMiddle.decodeToken], function (req, 
  * @apiUse ServerError
  * @apiSampleRequest off
  */
-router.post('/:id/actions/changeuserid', [jwtMiddle.decodeToken], function (req, res, next) {
+router.post('/:id/actions/changeuserid', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf,middlewares.ensureFieldAuthorisedForSomeUsers(comminFunctions.getAdminUsers,["email"],comminFunctions.getRequestBody)], function (req, res, next) {
 
     var id = (req.params.id).toString();
     req.url = "/" + id;
@@ -1267,8 +1356,11 @@ router.post('/:id/actions/changeuserid', [jwtMiddle.decodeToken], function (req,
     if(!req.body || !req.body.email)
         return res.status(400).send({error:"BadRequest", error_message:"no email field in body. email are mandatory"});
 
+    req.fastForward=conf.fastForwardPsw;
+
     var body = {user: {email:req.body.email}};
     req.body = body;
+
 
     req.method = "PUT";
     try {
@@ -1318,13 +1410,15 @@ router.post('/:id/actions/changeuserid', [jwtMiddle.decodeToken], function (req,
  * @apiUse ServerError
  * @apiSampleRequest off
  */
-router.post('/:id/actions/changeusername', [jwtMiddle.decodeToken], function (req, res, next) {
+router.post('/:id/actions/changeusername', [jwtMiddle.decodeToken,middlewares.ensureUserIsAdminOrSelf,middlewares.ensureFieldAuthorisedForSomeUsers(comminFunctions.getAdminUsers,["email"],comminFunctions.getRequestBody)], function (req, res, next) {
 
     var id = (req.params.id).toString();
     req.url = "/" + id;
 
     if(!req.body || !req.body.email)
         return res.status(400).send({error:"BadRequest", error_message:"no email field in body. email are mandatory"});
+
+    req.fastForward=conf.fastForwardPsw;
 
     var body = {user: {email:req.body.email}};
     req.body = body;

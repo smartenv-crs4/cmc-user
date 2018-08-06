@@ -354,7 +354,6 @@ describe('Users API', function () {
         it('must return one user of a type set in query ', function(done){
             createUser(function(token){
                 if(token){
-                    console.log(token);
                     var url = APIURL+'/actions/search'; //?type='+userStandard.type;
                     var requestParams={
                         url:url,
@@ -375,7 +374,7 @@ describe('Users API', function () {
                         done();
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -388,7 +387,6 @@ describe('Users API', function () {
         it('must return one user of all type as set in query ', function(done){
             createUser(function(token){
                 if(token){
-                    console.log(token);
                     var url = APIURL+'/actions/search'; //?type='+userStandard.type;
                     var requestParams={
                         url:url,
@@ -409,7 +407,7 @@ describe('Users API', function () {
                         done();
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -422,7 +420,6 @@ describe('Users API', function () {
         it('must return one user of all type as set in query. fields name ', function(done){
             createUser(function(token){
                 if(token){
-                    console.log(token);
                     var url = APIURL+'/actions/search'; //?type='+userStandard.type;
                     var requestParams={
                         url:url,
@@ -447,7 +444,7 @@ describe('Users API', function () {
                         done();
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -461,7 +458,6 @@ describe('Users API', function () {
         it('must return one user by name search ', function(done){
             createUser(function(token){
                 if(token){
-                    console.log(token);
                     var url = APIURL+'/actions/search'; //?type='+userStandard.type;
                     var requestParams={
                         url:url,
@@ -481,7 +477,7 @@ describe('Users API', function () {
                         done();
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -530,7 +526,6 @@ describe('Users API', function () {
         it('must not found a user of a type set in query', function(done){
             createUser(function(token){
                 if(token){
-                    console.log(token);
                     var url = APIURL+'/actions/search'; //?type='+userStandard.type;
                     var requestParams={
                         url:url,
@@ -551,7 +546,7 @@ describe('Users API', function () {
                         done();
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -579,7 +574,7 @@ describe('Users API', function () {
                         done();
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -606,7 +601,7 @@ describe('Users API', function () {
                         done();
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -633,7 +628,7 @@ describe('Users API', function () {
                         done();
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -658,7 +653,7 @@ describe('Users API', function () {
                         done();
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -681,7 +676,7 @@ describe('Users API', function () {
                         done();
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -710,7 +705,7 @@ describe('Users API', function () {
                         done();
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -740,7 +735,7 @@ describe('Users API', function () {
                         }
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -764,7 +759,7 @@ describe('Users API', function () {
                         }
                     });
                 }else{
-                    token.should.be.not(null);
+                    should(token).be.not.equal(null);
                 }
             })
 
@@ -842,4 +837,228 @@ describe('Users API', function () {
         });
     });
 
+
+
+
+
+    describe('POST /users/:id/actions/changeusername', function(){
+
+        it('must change a username', function(done){
+            createUser(function(token){
+                if(token){
+                    var url = APIURL+'/'+clientId +"/actions/changeusername";
+                    var bodyJ = {
+                        "email": "cambiami@cmc.com"
+                    };
+                    var bodyS = JSON.stringify(bodyJ);
+
+                    request.post({url:url,headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},body:bodyS},function(error, response, body){
+                        if(error) {
+                            should(error).be.equal(null);
+                        }
+                        else{
+                            console.log(body);
+                            response.statusCode.should.be.equal(200);
+
+                            Users.findOne({email:bodyJ.email}, function(err, usr){
+                                should(usr).be.not.equal(null);
+                                // usr.should.be.not(null);
+                                done();
+                            });
+                        }
+                    });
+                }else{
+                    should(token).be.not.equal(null);
+                }
+            })
+
+        });
+    });
+
+
+    describe('POST /users/:id/actions/changeuserid', function(){
+
+        it('must change a username', function(done){
+            createUser(function(token){
+                if(token){
+                    var url = APIURL+'/'+clientId +"/actions/changeuserid";
+                    var bodyJ = {
+                        "email": "cambiami@cmc.com"
+                    };
+                    var bodyS = JSON.stringify(bodyJ);
+                    request.post({url:url,headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},body:bodyS},function(error, response, body){
+                        if(error) {
+                            should(error).be.equal(null);
+                        }
+                        else{
+                            console.log(body);
+                            response.statusCode.should.be.equal(200);
+
+                            Users.findOne({email:bodyJ.email}, function(err, usr){
+                                should(usr).be.not.equal(null);
+                                // usr.should.be.not(null);
+                                done();
+                            });
+                        }
+                    });
+                }else{
+                    should(token).be.not.equal(null);
+                }
+            })
+
+        });
+    });
+
+
+
+
+    describe('POST /users/:id/actions/changeusername', function(){
+
+        it('must change a username and check if AuthMs is updated', function(done){
+            createUser(function(token){
+                if(token){
+                    var url = APIURL+'/'+clientId +"/actions/changeusername";
+                    var bodyJ = {
+                        "email": "cambiami@cmc.com"
+                    };
+                    var bodyS = JSON.stringify(bodyJ);
+
+                    request.post({url:url,headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},body:bodyS},function(error, response, body){
+                        if(error) {
+                            should(error).be.equal(null);
+                        }
+                        else{
+                            console.log(body);
+                            response.statusCode.should.be.equal(200);
+
+                            Users.findOne({email:bodyJ.email}, function(err, usr){
+                                should(usr).be.not.equal(null);
+                                // usr.should.be.not(null);
+
+                                var url = conf.authUrl+'/authuser' + "?email="+bodyJ.email; //?type='+userStandard.type;
+                                var requestParams={
+                                    url:url,
+                                    headers:{'content-type': 'application/json','Authorization' : "Bearer "+ MStoken}
+                                };
+                                request.get(requestParams,function(error, response, body){
+                                    if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
+                                    else{
+                                        console.log(body);
+                                        response.statusCode.should.be.equal(200);
+                                        var results = JSON.parse(response.body);
+                                        results.should.have.property('_metadata');
+                                        results.should.have.property('users');
+                                        results._metadata.totalCount.should.be.equal(1);
+                                        results.users[0].type.should.be.equal(userStandard.type);
+                                    }
+                                    done();
+                                });
+                            });
+                        }
+                    });
+                }else{
+                    should(token).be.not.equal(null);
+                }
+            })
+
+        });
+    });
+
+
+
+
+    describe('POST /users/:id/actions/changeusername', function(){
+
+        it('must change a username check if AuthMs is updated and test login', function(done){
+            createUser(function(token){
+                if(token){
+                    var url = APIURL+'/'+clientId +"/actions/changeusername";
+                    var bodyJ = {
+                        "email": "cambiami@cmc.com"
+                    };
+                    var bodyS = JSON.stringify(bodyJ);
+
+                    request.post({url:url,headers:{'content-type': 'application/json','Authorization' : "Bearer "+ adminToken},body:bodyS},function(error, response, body){
+                        if(error) {
+                            should(error).be.equal(null);
+                        }
+                        else{
+                            console.log(body);
+                            response.statusCode.should.be.equal(200);
+
+                            Users.findOne({email:bodyJ.email}, function(err, usr){
+                                should(usr).be.not.equal(null);
+                                // usr.should.be.not(null);
+
+                                var url = conf.authUrl+'/authuser' + "?email="+bodyJ.email; //?type='+userStandard.type;
+                                var requestParams={
+                                    url:url,
+                                    headers:{'content-type': 'application/json','Authorization' : "Bearer "+ MStoken}
+                                };
+                                request.get(requestParams,function(error, response, body){
+                                    if(error) console.log("######   ERRORE: 401 2 " + error + "  ######");
+                                    else{
+                                        console.log(body);
+                                        response.statusCode.should.be.equal(200);
+                                        var results = JSON.parse(response.body);
+                                        results.should.have.property('_metadata');
+                                        results.should.have.property('users');
+                                        results._metadata.totalCount.should.be.equal(1);
+                                        results.users[0].type.should.be.equal(userStandard.type);
+                                    }
+
+
+                                    var userLogin = {
+                                        "username": userStandard.email,
+                                        "password": userStandard.password
+                                    };
+
+                                    var userBodyLogin=JSON.stringify(userLogin);
+                                    url=APIURL+"/signin";
+                                    request.post({ // should not be possible login with old username
+                                        url: url,
+                                        body: userBodyLogin,
+                                        headers: {'content-type': 'application/json', 'Authorization': "Bearer " + conf.testConfig.myWebUITokenToSignUP}
+                                    }, function (error, response) {
+                                        if (error) console.log("######  ERRORE should  login a Authuser: " + error +"  ######");
+                                        else {
+                                            response.statusCode.should.be.equal(403);
+                                            var results = JSON.parse(response.body);
+                                            results.should.have.property('error');
+                                            results.should.have.property('error_message');
+                                            results.error_message.indexOf("You are not correctly authenticated").should.be.greaterThan(-1);
+
+                                            userLogin.username=bodyJ.email;
+                                            userBodyLogin = JSON.stringify(userLogin);
+
+
+                                            url=APIURL+"/signin";
+                                            request.post({ // should be possible login with new username
+                                                url: url,
+                                                body: userBodyLogin,
+                                                headers: {'content-type': 'application/json', 'Authorization': "Bearer " + conf.testConfig.myWebUITokenToSignUP}
+                                            }, function (error, response) {
+                                                if (error) console.log("######  ERRORE should  login a Authuser: " + error +"  ######");
+                                                else {
+                                                    response.statusCode.should.be.equal(200);
+                                                    var results = JSON.parse(response.body);
+                                                    results.should.have.property('access_credentials');
+                                                    results.access_credentials.should.have.property('apiKey');
+                                                    results.access_credentials.should.have.property('refreshToken');
+                                                }
+                                                done();
+                                            });
+                                        }
+                                    });
+                                });
+                            });
+                        }
+                    });
+                }else{
+                    should(token).be.not.equal(null);
+                }
+            })
+
+        });
+    });
 });

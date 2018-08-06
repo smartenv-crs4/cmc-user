@@ -8,6 +8,7 @@
     "logfile":"/var/log/CMC-User-Microservice.log",
     "authUrl":"your_auth_microservice_base_url",
     "auth_token":"your_auth_service_token",
+    "fastForwardPsw":"f@5tF0rwardP5w",
     "AdminDefaultUser" : {
       "name": "Admin",
       "email": "admin@admin.com",
@@ -45,6 +46,7 @@
     "logfile":"/var/log/CMC-User-Microservice.log",
     "authUrl":"your_auth_microservice_base_url",
     "auth_token":"your_auth_service_token",
+    "fastForwardPsw":"f@5tF0rwardP5w",
     "AdminDefaultUser" : {
       "name": "Admin",
       "email": "admin@admin.com",

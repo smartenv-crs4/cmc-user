@@ -130,6 +130,21 @@ exports.setConfig= function(callback){
     }
 };
 
+
+exports.getAdminUsers= function(){
+    return conf.adminUser;
+};
+
+exports.getRequestBodyUser= function(req){
+    return ((req.body && req.body.user) || {});
+};
+
+exports.getRequestBody= function(req){
+    return (req.body  || {});
+};
+
+
+
 //exports.getMyToken = function() {
 //
 //                conf.MyMicroserviceToken="yJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtb2RlIjoibXMiLCJpc3MiOiJub3QgdXNlZCBmbyBtcyIsImVtYWlsIjoibm90IHVzZWQgZm8gbXMiLCJ0eXBlIjoiQXV0aE1zIiwiZW5hYmxlZCI6dHJ1ZSwiZXhwIjoxNzgwODM0NTQxMzQxfQ.gJkSUCAkqzIb52s2ITohj7vXx-EXpicObSaJ1uSgdog";
