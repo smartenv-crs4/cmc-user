@@ -792,10 +792,15 @@ router.put('/:id', [jwtMiddle.decodeToken, middlewares.ensureUserIsAdminOrSelf,m
 
     var newVals;
     try {
-        newVals = req.body.user; // body already parsed
+        newVals = req.body.user || null; // body already parsed
     } catch (e) {
-        res.status(500).send({error: "update error", error_message: 'no user updated (error:' + e + ')'});
+        return res.status(500).send({error: "update error", error_message: 'no user updated (error:' + e + ')'});
     }
+
+
+    if(!newVals)
+        return res.status(400).send({error: "BadRequest", error_message: 'no mandatory user body field in request'});
+
     if (newVals.password) {
         return res.status(400).send({
             error: "BadRequest",

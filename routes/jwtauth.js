@@ -86,7 +86,10 @@ exports.decodeToken = function(req, res, next) {
                             }
                         }
                     } catch (ex) {
-                        return res.status(500).send(ex);
+                        return res.status(500).send({
+                            error: 'InternalServerError',
+                            error_message: ex
+                        });
                     }
                 });
 
@@ -99,7 +102,10 @@ exports.decodeToken = function(req, res, next) {
                     });
             }
         } catch (ex) {
-            return res.status(500).send(ex);
+            return res.status(500).send({
+                error: 'InternalServerError',
+                error_message: ex
+            });
         }
     }
 
