@@ -26,7 +26,7 @@ var util=require('util');
 var User = require('../models/users').User;
 var _=require("underscore");
 var request=require('request');
-
+var redisSync=require('./redisSync');
 
 exports.createUserAsAdmin = function(user,callb) {
 
@@ -117,9 +117,12 @@ exports.setConfig= function(callback){
                     callback({error: 'internal_User_microservice_error', error_message: error + ""}, null);
 
                 } else {
-                    var appT = JSON.parse(body).superuser;
-                    conf.adminUser = appT;
-                    callback(null, appT);
+                    var appT = JSON.parse(body);
+                    if(appT.redisChannel){
+                        redisSync.subscribe(appT.redisChannel);
+                    }
+                    conf.adminUser = appT.superuser;
+                    callback(null, appT.superuser);
                 }
             } catch (ex) {
                 callback({error: "InternalError", error_message: ex}, null)

@@ -11,7 +11,7 @@
     "fastForwardPsw":"f@5tF0rwardP5w",
     "AdminDefaultUser" : {
       "name": "Admin",
-      "email": "admin@admin.com",
+      "email": "Not set it due to reading from auth ms",
       "surname":"Admin"
     },
     "testConfig":{
@@ -34,6 +34,12 @@
       },
       "msName":"cmc-user"
     },
+    "redisCache":{
+      "host": "YOUR_REDIS_HOST",
+      "port":  6379,
+      "db": 0,
+      "password":null
+    },
     "exampleUrl":"Your_Project_API_URL"
   },
 
@@ -49,8 +55,14 @@
     "fastForwardPsw":"f@5tF0rwardP5w",
     "AdminDefaultUser" : {
       "name": "Admin",
-      "email": "admin@admin.com",
+      "email": "Not set it due to reading from auth ms",
       "surname":"Admin"
+    },
+    "redisCache":{
+      "host": "YOUR_REDIS_HOST",
+      "port":  6379,
+      "db": 0,
+      "password":null
     },
     "exampleUrl":"Your_Project_API_URL"
 
