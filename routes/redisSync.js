@@ -29,6 +29,7 @@ var adminUserSync={
     "unsubscribe":function(){
     },
     "subscribe":function(channel){
+        console.log("Subscibe Mode");
         var redisConf=conf.redisCache || null;
         if(!redisConf.password)
             delete redisConf.password;
@@ -36,6 +37,7 @@ var adminUserSync={
         var redisClient = redis.createClient(redisConf);
         redisClient.on("ready", function (err) {
 
+            console.log("Redis Channel Ready");
             redisClient.subscribe(channel);
 
 
@@ -50,6 +52,7 @@ var adminUserSync={
 
         redisClient.on("error", function (err) {
             console.log("Error in redisSync " + err);
+            adminUserSync.subscribe(channel);
         });
 
         redisClient.on("subscribe", function (channel, count) {

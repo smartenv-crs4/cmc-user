@@ -119,6 +119,7 @@ exports.setConfig= function(callback){
                 } else {
                     var appT = JSON.parse(body);
                     if(appT.redisChannel){
+                        console.log("getsupeusertokenlist return redis Channel do subscibe to it: " + appT.redisChannel);
                         redisSync.subscribe(appT.redisChannel);
                     }
                     conf.adminUser = appT.superuser;
