@@ -19,7 +19,7 @@
     "jwt-simple": "^0.2.0",
     "moment": "^2.13.0",
     "mongoose": "^4.6.0",
-    "morgan": "~1.3.0",
+    "morgan": "^1.9.1",
     "propertiesmanager": "^2.0.2",
     "redis": "^2.8.0",
     "request": "^2.72.0",

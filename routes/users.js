@@ -329,7 +329,6 @@ router.post('/signup',[jwtMiddle.decodeToken],function(req, res){
                                 error_message: 'Unable to register user (err:' + err + ')'
                             });
 
-
                         } else {
                             var tmpU = JSON.parse(JSON.stringify(newUser));
                             delete tmpU['__v'];
