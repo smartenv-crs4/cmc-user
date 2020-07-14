@@ -38,7 +38,7 @@ router.get('/', function(req, res) {
   res.render('index', { title: 'Crs4 Microservice Core(CMC) dev User API' });
 });
 
-module.exports = router;
+
 
 /* GET environment information */
 router.get('/env', function(req, res) {
@@ -50,3 +50,11 @@ router.get('/env', function(req, res) {
 
   res.status(200).send({env:env});
 });
+
+
+/* GET environment info page. */
+router.get('/running_env', function(req, res) {
+  res.status(200).send({conf:conf});
+});
+
+module.exports = router;

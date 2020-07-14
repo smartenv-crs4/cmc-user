@@ -3,6 +3,10 @@
     "dbHost":"your_db_host",
     "dbPort":"27017",
     "dbName":"CMCUSERDEV",
+    "dbAuth": {
+      "user": null,
+      "psw": null
+    },
     "limit":50,
     "skip":0,
     "logfile":"/var/log/CMC-User-Microservice.log",
@@ -47,6 +51,10 @@
     "dbHost":"your_db_host",
     "dbPort":"27017",
     "dbName":"CMCUSER",
+    "dbAuth": {
+      "user": null,
+      "psw": null
+    },
     "limit":50,
     "skip":0,
     "logfile":"/var/log/CMC-User-Microservice.log",
